@@ -4,6 +4,7 @@ import { useState } from 'react'
 import './App.css'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import Login from './components/Login'
+import DashboardPage from './pages/DashboardPage'
 
 function App() {
 
@@ -11,6 +12,7 @@ function App() {
     <>
       <BrowserRouter>
         <Routes>
+          <Route path='/dashboard' element={<DashboardPage/>}/>
           <Route path='/' element={<Login/>}/>
           
         </Routes>
