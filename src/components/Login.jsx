@@ -1,11 +1,9 @@
-// src/components/Login.js
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Button, Checkbox, Label, TextInput } from 'flowbite-react';
+import { Button, Form, Container, Row, Col, Toast } from 'react-bootstrap';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-// import logoYayasan from '../../assets/logoYayasan.jpg';
 
 function Login() {
   const [data, setData] = useState({ email: '', password: '' });
@@ -22,7 +20,7 @@ function Login() {
     const hasLowerCase = /[a-z]/.test(password);
     const hasDigit = /\d/.test(password);
     const hasSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-    
+
     return (
       password.length >= minLength &&
       hasUpperCase &&
@@ -72,90 +70,70 @@ function Login() {
   };
 
   return (
-    <div className="h-screen flex items-center justify-center bg-gray-100">
+    <Container fluid className="h-100 d-flex justify-content-center align-items-center bg-light">
       <ToastContainer position="top-right" autoClose={3000} />
-      <div className="flex shadow-lg rounded-lg overflow-hidden max-w-4xl w-full">
-        <div className="hidden md:flex flex-col justify-center items-center bg-blue-600 text-white w-1/2 p-10">
-          {/* <img
-            src={logoYayasan}
-            alt="Logo Yayasan"
-            className="mb-5 w-40 h-40 object-contain"
-          /> */}
-          <h2 className="text-2xl font-bold mb-2">Selamat Datang</h2>
-          <p className="text-center">
-            Silakan masuk untuk melanjutkan dan menikmati layanan kami.
-          </p>
-        </div>
+      <Row className="w-100">
+        {/* Left Side: Image or Welcome Message */}
+        <Col xs={12} md={6} className="bg-primary text-white p-4 d-flex flex-column justify-content-center align-items-center">
+          {/* Uncomment logo if needed */}
+          {/* <img src={logoYayasan} alt="Logo Yayasan" className="mb-4 w-40 h-40 object-contain" /> */}
+          <h2 className="mb-2 font-weight-bold">Selamat Datang</h2>
+          <p className="text-center">Silakan masuk untuk melanjutkan dan menikmati layanan kami.</p>
+        </Col>
 
-        <div className="bg-white w-full md:w-1/2 p-8">
-          <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold">Salam hangat kembali!</h2>
-            <p className="text-gray-600">Kami sangat senang Anda kembali bersama kami.</p>
-          </div>
+        {/* Right Side: Login Form */}
+        <Col xs={12} md={6} className="bg-white p-5">
+          <h2 className="text-center mb-4">Salam hangat kembali!</h2>
+          <p className="text-center text-muted">Kami sangat senang Anda kembali bersama kami.</p>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Label htmlFor="email" value="Email address" />
-              <TextInput
-                id="email"
+          <Form onSubmit={handleSubmit}>
+            <Form.Group controlId="email">
+              <Form.Label>Email address</Form.Label>
+              <Form.Control
                 type="email"
                 placeholder="Enter email"
                 name="email"
                 value={data.email}
                 onChange={handleChange}
                 required
-                className="mt-1"
               />
-            </div>
+            </Form.Group>
 
-            <div>
-              <Label htmlFor="password" value="Password" />
-              <TextInput
-                id="password"
+            <Form.Group controlId="password" className="mt-3">
+              <Form.Label>Password</Form.Label>
+              <Form.Control
                 type="password"
                 placeholder="Enter password"
                 name="password"
                 value={data.password}
                 onChange={handleChange}
                 required
-                className="mt-1"
               />
-            </div>
+            </Form.Group>
 
-            {error && <div className="text-red-500">{error}</div>}
+            {error && <div className="text-danger mt-2">{error}</div>}
 
-            <div className="flex items-center justify-between mt-4">
-              <Checkbox id="remember" />
-              <Label htmlFor="remember" className="ml-2">
-                Remember Me
-              </Label>
-              <Link
-                to="/forgot-password"
-                className="text-sm text-blue-600 hover:underline"
-              >
+            <div className="d-flex justify-content-between align-items-center mt-4">
+              <Form.Check type="checkbox" id="remember" label="Remember Me" />
+              <Link to="/forgot-password" className="text-sm text-primary">
                 Forgot Password?
               </Link>
             </div>
 
-            <Button type="submit" className="w-full mt-4">
+            <Button type="submit" className="w-100 mt-4">
               Login
             </Button>
-          </form>
+          </Form>
 
-          <div className="text-center mt-4">
-            <span className="text-sm text-gray-600">
-              Don't have an account?{' '}
-            </span>
-            <Link
-              to="/auth/signup"
-              className="text-sm text-blue-600 hover:underline"
-            >
+          <div className="text-center mt-3">
+            <span className="text-muted">Don't have an account? </span>
+            <Link to="/auth/signup" className="text-primary">
               Sign Up
             </Link>
           </div>
-        </div>
-      </div>
-    </div>
+        </Col>
+      </Row>
+    </Container>
   );
 }
 

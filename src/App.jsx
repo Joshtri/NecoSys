@@ -5,6 +5,11 @@ import './App.css'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import Login from './components/Login'
 import DashboardPage from './pages/DashboardPage'
+import PenggunaPage from './pages/Pengguna/PenggunaPage'
+import AnggotaPage from './pages/Anggota/AnggotaPage'
+import ItemSampahPage from './pages/ItemSampah/ItemSampahPage'
+import KategoriSampahPage from './pages/KategoriSampah/KategoriSampahPage'
+import TransaksiPage from './pages/Transaksi/TransaksiPage'
 
 function App() {
 
@@ -14,6 +19,12 @@ function App() {
         <Routes>
           <Route path='/dashboard' element={<DashboardPage/>}/>
           <Route path='/' element={<Login/>}/>
+
+          <Route path="/admin/pengguna" element={<PenggunaPage />} />
+          <Route path="/admin/anggota" element={<AnggotaPage />} />
+          <Route path="/admin/kategori-sampah" element={<KategoriSampahPage />} />
+          <Route path="/admin/item-sampah" element={<ItemSampahPage />} />
+          <Route path="/admin/transaksi" element={<TransaksiPage />} />
           
         </Routes>
       </BrowserRouter>
