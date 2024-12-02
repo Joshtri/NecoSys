@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 
-
-
 function AddKategoriSampah({ show, handleClose, handleSubmit }) {
   const [nama, setNama] = useState('');
   const [deskripsi, setDeskripsi] = useState('');

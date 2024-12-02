@@ -1,19 +1,47 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+import axios from 'axios';  // Import axios
 
 function AnggotaData() {
   const [anggota, setAnggota] = useState([]);
 
-  // Fetch anggota data from backend
+  // Fetch anggota data from backend using axios
   useEffect(() => {
     async function fetchAnggota() {
-      const response = await fetch('/api/anggota');
-      const data = await response.json();
-      setAnggota(data);
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/anggota`);  // Using axios.get
+        if (response.data.status === 'success') {
+          setAnggota(response.data.data);  // Set the anggota data from the API response
+        } else {
+          alert('Failed to fetch anggota data');
+        }
+      } catch (error) {
+        console.error('Error fetching anggota data:', error);
+        alert('Error fetching anggota data');
+      }
     }
+
     fetchAnggota();
   }, []);
+
+  // Function to handle deleting anggota using axios
+  const handleDelete = async (id) => {
+    try {
+      const response = await axios.delete(`/api/anggota/${id}`);  // Using axios.delete
+
+      if (response.status === 200) {
+        // Remove the deleted anggota from the list
+        setAnggota(anggota.filter(item => item.id !== id));
+        alert('Anggota deleted successfully');
+      } else {
+        alert('Failed to delete anggota');
+      }
+    } catch (error) {
+      console.error('Error deleting anggota:', error);
+      alert('Error deleting anggota');
+    }
+  };
 
   return (
     <div className="container mt-4">
@@ -52,14 +80,6 @@ function AnggotaData() {
       </Table>
     </div>
   );
-}
-
-// Function to handle deleting anggota (you can implement backend API call here)
-async function handleDelete(id) {
-  await fetch(`/api/anggota/${id}`, {
-    method: 'DELETE',
-  });
-  alert('Anggota deleted');
 }
 
 export default AnggotaData;
