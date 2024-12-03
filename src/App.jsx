@@ -10,6 +10,7 @@ import AnggotaPage from './pages/Anggota/AnggotaPage'
 import ItemSampahPage from './pages/ItemSampah/ItemSampahPage'
 import KategoriSampahPage from './pages/KategoriSampah/KategoriSampahPage'
 import TransaksiPage from './pages/Transaksi/TransaksiPage'
+import AddTransaksiPage from './pages/Transaksi/AddTransaksiPage'
 
 function App() {
 
@@ -25,6 +26,10 @@ function App() {
           <Route path="/admin/kategori-sampah" element={<KategoriSampahPage />} />
           <Route path="/admin/item-sampah" element={<ItemSampahPage />} />
           <Route path="/admin/transaksi" element={<TransaksiPage />} />
+
+
+          <Route path="/transaksi/add" element={<AddTransaksiPage />} />
+
           
         </Routes>
       </BrowserRouter>
