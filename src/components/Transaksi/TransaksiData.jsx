@@ -16,13 +16,11 @@ function TransaksiData() {
           throw new Error('Failed to fetch transaksi data');
         }
         const data = await response.json();
-        
-        // Ensure we access the 'data' key from the response
+
         console.log('Fetched transaksi data:', data);
 
-        // Check if 'data' is an array and set state accordingly
         if (Array.isArray(data.data)) {
-          setTransaksi(data.data);  // Use 'data' key from the response
+          setTransaksi(data.data);
         } else {
           console.error('Expected array in data, but received:', data);
           alert('Data transaksi is not in the expected format');
@@ -33,37 +31,7 @@ function TransaksiData() {
       }
     }
 
-    async function fetchAnggota() {
-      try {
-        const response = await fetch(`${import.meta.env.VITE_BASE_URL}/anggota`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch anggota data');
-        }
-        const data = await response.json();
-        setAnggotaList(data);
-      } catch (error) {
-        console.error('Error fetching anggota data:', error);
-        alert('Error fetching anggota data');
-      }
-    }
-
-    async function fetchItemSampah() {
-      try {
-        const response = await fetch(`${import.meta.env.VITE_BASE_URL}/item/sampah`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch item sampah data');
-        }
-        const data = await response.json();
-        setItemSampahList(data);
-      } catch (error) {
-        console.error('Error fetching item sampah data:', error);
-        alert('Error fetching item sampah data');
-      }
-    }
-
     fetchTransaksi();
-    fetchAnggota();
-    fetchItemSampah();
   }, []);
 
   // Function to handle deleting transaksi
@@ -93,31 +61,33 @@ function TransaksiData() {
           </tr>
         </thead>
         <tbody>
-          {Array.isArray(transaksi) && transaksi.length > 0 ? (
-            transaksi.map((item) => (
-              <tr key={item.id}>
-                <td>{item.id}</td>
-                <td>{item.anggota?.nama}</td>
-                <td>{item.itemSampah?.nama}</td>
-                <td>{item.jumlah}</td>
-                <td>{item.totalHarga}</td>
-                <td>
-                  <Link to={`/admin/transaksi/${item.id}`} className="btn btn-info">
-                    View
-                  </Link>
-                  <Button variant="danger" onClick={() => handleDelete(item.id)} className="ms-2">
-                    Delete
-                  </Button>
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="6" className="text-center">
-                No transaksi found
-              </td>
-            </tr>
-          )}
+        {Array.isArray(transaksi) && transaksi.length > 0 ? (
+  transaksi.map((item) => (
+    <tr key={item.id}>
+      <td>{item.id}</td>
+      <td>{item.anggota ? item.anggota.nama : 'Unknown'}</td>
+      <td>
+        {item.itemTransaksi.length > 0 ? (
+          item.itemTransaksi.map((itemTrans, idx) => (
+            <div key={idx}>
+              {itemTrans.itemSampah.nama} ({itemTrans.jumlah}) - {itemTrans.itemSampah.kategoriSampah.nama}
+            </div>
+          ))
+        ) : (
+          <span>No items</span>
+        )}
+      </td>
+      <td>{item.totalTransaksi}</td>
+    </tr>
+  ))
+) : (
+  <tr>
+    <td colSpan="5" className="text-center">
+      No transaksi found
+    </td>
+  </tr>
+)}
+
         </tbody>
       </Table>
     </div>

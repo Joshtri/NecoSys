@@ -17,7 +17,6 @@ function AddTransaksi() {
     const fetchAnggota = async () => {
       try {
         const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/anggota`);
-        console.log('Anggota response:', response.data);  // Debugging log
         if (response.data.status === 'success' && Array.isArray(response.data.data)) {
           setAnggotaList(response.data.data);
         }
@@ -29,7 +28,6 @@ function AddTransaksi() {
     const fetchItemSampah = async () => {
       try {
         const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/item/sampah`);
-        console.log('Item Sampah response:', response.data);  // Debugging log
         if (response.data.status === 'success' && Array.isArray(response.data.data)) {
           setItemSampahList(response.data.data);
         }
@@ -46,7 +44,6 @@ function AddTransaksi() {
   const calculateTotalPrice = (itemId, quantity) => {
     const selectedItem = itemSampahList.find((item) => item.id === itemId);
     const totalPrice = selectedItem ? selectedItem.hargaPerKg * quantity : 0;
-    console.log(`Calculated total for item ${itemId}: ${totalPrice}`);  // Debugging log
     return totalPrice;
   };
 
@@ -60,7 +57,6 @@ function AddTransaksi() {
     const total = calculateTotalPrice(selectedItemSampah, jumlah);
 
     const newCartItem = { itemId: selectedItemSampah, jumlah, totalHarga: total };
-    console.log('Adding item to cart:', newCartItem);  // Debugging log
 
     // Add the item to the cart
     setCart([...cart, newCartItem]);
@@ -73,36 +69,42 @@ function AddTransaksi() {
   // Handle form submission
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-
-      // Calculate the total of all items in the cart
-  const totalTransaksi = cart.reduce((sum, item) => sum + item.totalHarga, 0);
-
+  
+    // Calculate the total of all items in the cart
+    const totalTransaksi = cart.reduce((sum, item) => sum + item.totalHarga, 0);
+  
     const newTransaksi = {
-        anggotaId: selectedAnggota,
-        totalTransaksi: totalTransaksi,  // Pastikan totalTransaksi dihitung dengan benar
-        items: cart.map((item) => ({
-          itemSampahId: item.itemId,  // ID item sampah
-          kuantitas: parseFloat(item.jumlah),  // Pastikan kuantitas adalah angka
-          totalHarga: parseFloat(item.totalHarga),  // Pastikan totalHarga adalah angka
-        })),
-      };
-      
-      console.log('New Transaksi Data:', newTransaksi); // Debugging log untuk memeriksa data yang dikirim
-      
-      try {
-        const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/transaksi`, newTransaksi);
-        console.log('Transaction response:', response.data); // Debugging log
-        navigate('/admin/transaksi');
-      } catch (error) {
-        console.error('Error adding transaksi', error);
-      }
-      
+      anggotaId: selectedAnggota,
+      totalTransaksi: totalTransaksi,  // Pastikan totalTransaksi dihitung dengan benar
+      itemTransaksi: cart.map((item) => ({
+        itemSampahId: item.itemId,  // ID item sampah
+        kuantitas: parseFloat(item.jumlah),  // Pastikan kuantitas adalah angka
+        totalHarga: parseFloat(item.totalHarga),  // Pastikan totalHarga adalah angka
+      })),
+    };
+  
+    console.log('New Transaksi Data:', newTransaksi);  // Debugging log untuk memeriksa data yang dikirim
+    
+    // if (newTransaksi.items.length === 0) {
+    //   alert("Cart cannot be empty.");
+    //   return;
+    // }
+  
+    try {
+      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/transaksi`, newTransaksi);
+      console.log('Transaction response:', response.data);  // Debugging log
+      navigate('/admin/transaksi');
+    } catch (error) {
+      console.error('Error adding transaksi', error);
+    }
   };
+  
 
   return (
     <Container className="mt-4">
       <h2 className="mb-4">Add New Transaksi</h2>
       <Form onSubmit={handleFormSubmit}>
+        {/* Select Anggota (Member) */}
         <Row className="mb-4">
           <Col md={6}>
             <Form.Group controlId="formAnggota">
@@ -127,6 +129,7 @@ function AddTransaksi() {
           </Col>
         </Row>
 
+        {/* Select Item Sampah and Quantity */}
         <Row className="mb-4">
           <Col md={6}>
             <Form.Group controlId="formItemSampah">
