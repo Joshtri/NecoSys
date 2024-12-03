@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+import DeleteTransaksi from './DeleteTransaksi'; // Import the modal component
 
 function TransaksiData() {
-  const [transaksi, setTransaksi] = useState([]);  // Default state is an empty array
-  const [anggotaList, setAnggotaList] = useState([]);  // Daftar anggota untuk dipilih
-  const [itemSampahList, setItemSampahList] = useState([]);  // Daftar item sampah untuk dipilih
+  const [transaksi, setTransaksi] = useState([]);
+  const [showModal, setShowModal] = useState(false); // To control the modal visibility
+  const [transaksiIdToDelete, setTransaksiIdToDelete] = useState(null); // Store the ID of the transaksi to be deleted
 
   // Fetch transaksi data from backend
   useEffect(() => {
@@ -16,7 +17,6 @@ function TransaksiData() {
           throw new Error('Failed to fetch transaksi data');
         }
         const data = await response.json();
-
         console.log('Fetched transaksi data:', data);
 
         if (Array.isArray(data.data)) {
@@ -34,19 +34,33 @@ function TransaksiData() {
     fetchTransaksi();
   }, []);
 
-  // Function to handle deleting transaksi
+  // Function to handle showing the modal with the transaction ID
+  function handleShowDeleteModal(id) {
+    setTransaksiIdToDelete(id);
+    setShowModal(true);
+  }
+
+  // Function to handle deleting the transaksi
   async function handleDelete(id) {
-    await fetch(`/api/transaksi/${id}`, {
-      method: 'DELETE',
-    });
-    alert('Transaksi deleted');
-    setTransaksi(transaksi.filter((item) => item.id !== id));
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/transaksi/${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error('Failed to delete transaksi');
+      }
+      alert('Transaksi deleted');
+      setTransaksi(transaksi.filter((item) => item.id !== id)); // Remove deleted item from state
+    } catch (error) {
+      console.error('Error deleting transaksi:', error);
+      alert('Error deleting transaksi');
+    }
   }
 
   return (
     <div className="container mt-4">
       <h2>Data Transaksi</h2>
-      <Link to='/transaksi/add' className="mb-3 btn btn-primary">
+      <Link to="/transaksi/add" className="mb-3 btn btn-primary">
         Add New Transaksi
       </Link>
       <Table striped bordered hover>
@@ -57,39 +71,71 @@ function TransaksiData() {
             <th>Item Sampah</th>
             <th>Jumlah</th>
             <th>Total Harga</th>
+            <th>Status</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-        {Array.isArray(transaksi) && transaksi.length > 0 ? (
-  transaksi.map((item) => (
-    <tr key={item.id}>
-      <td>{item.id}</td>
-      <td>{item.anggota ? item.anggota.nama : 'Unknown'}</td>
-      <td>
-        {item.itemTransaksi.length > 0 ? (
-          item.itemTransaksi.map((itemTrans, idx) => (
-            <div key={idx}>
-              {itemTrans.itemSampah.nama} ({itemTrans.jumlah}) - {itemTrans.itemSampah.kategoriSampah.nama}
-            </div>
-          ))
-        ) : (
-          <span>No items</span>
-        )}
-      </td>
-      <td>{item.totalTransaksi}</td>
-    </tr>
-  ))
-) : (
-  <tr>
-    <td colSpan="5" className="text-center">
-      No transaksi found
-    </td>
-  </tr>
-)}
-
+          {Array.isArray(transaksi) && transaksi.length > 0 ? (
+            transaksi.map((item) => (
+              <tr key={item.id}>
+                <td>{item.id}</td>
+                <td>{item.anggota ? item.anggota.nama : 'Unknown'}</td>
+                <td>
+                  {item.itemTransaksi.length > 0 ? (
+                    item.itemTransaksi.map((itemTrans, idx) => (
+                      <div key={idx}>
+                        <strong>{itemTrans.itemSampah.nama}</strong>
+                      </div>
+                    ))
+                  ) : (
+                    <span>No items</span>
+                  )}
+                </td>
+                <td>
+                  {item.itemTransaksi.length > 0 ? (
+                    item.itemTransaksi.map((itemTrans, idx) => (
+                      <div key={idx}>
+                        {itemTrans.jumlah}
+                      </div>
+                    ))
+                  ) : (
+                    <span>No items</span>
+                  )}
+                </td>
+                <td>{item.totalTransaksi}</td>
+                <td>{item.statusTransaksi}</td>
+                <td>
+                  <Link to={`/transaksi/view/${item.id}`} className="btn btn-info">
+                    View
+                  </Link>
+                  <Button
+                    variant="danger"
+                    onClick={() => handleShowDeleteModal(item.id)} // Show modal on delete click
+                    className="ms-2"
+                  >
+                    Delete
+                  </Button>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="7" className="text-center">
+                No transaksi found
+              </td>
+            </tr>
+          )}
         </tbody>
       </Table>
+
+      {/* Include the Delete Confirmation Modal */}
+      <DeleteTransaksi
+        show={showModal}
+        onClose={() => setShowModal(false)} // Close modal
+        onDelete={handleDelete} // Call handleDelete on confirmation
+        transaksiId={transaksiIdToDelete} // Pass the ID to the modal
+      />
     </div>
   );
 }
