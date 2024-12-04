@@ -1,61 +1,71 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios'; // Import Axios
 import { Table, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import DeleteTransaksi from './DeleteTransaksi'; // Import the modal component
+import DeleteTransaksi from './DeleteTransaksi';
+import UpdateStatus from './UpdateStatus';
 
 function TransaksiData() {
   const [transaksi, setTransaksi] = useState([]);
-  const [showModal, setShowModal] = useState(false); // To control the modal visibility
+  const [showModal, setShowModal] = useState(false); // To control the delete modal visibility
+  const [showStatusModal, setShowStatusModal] = useState(false); // To control the update status modal visibility
   const [transaksiIdToDelete, setTransaksiIdToDelete] = useState(null); // Store the ID of the transaksi to be deleted
+  const [transaksiIdToUpdate, setTransaksiIdToUpdate] = useState(null); // Store the ID of the transaksi to update
+  const [newStatus, setNewStatus] = useState(''); // Store the new status
 
   // Fetch transaksi data from backend
   useEffect(() => {
-    async function fetchTransaksi() {
-      try {
-        const response = await fetch(`${import.meta.env.VITE_BASE_URL}/transaksi`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch transaksi data');
-        }
-        const data = await response.json();
-        console.log('Fetched transaksi data:', data);
-
-        if (Array.isArray(data.data)) {
-          setTransaksi(data.data);
-        } else {
-          console.error('Expected array in data, but received:', data);
-          alert('Data transaksi is not in the expected format');
-        }
-      } catch (error) {
-        console.error('Error fetching transaksi data:', error);
-        alert('Error fetching transaksi data');
-      }
-    }
-
     fetchTransaksi();
   }, []);
 
-  // Function to handle showing the modal with the transaction ID
+  async function fetchTransaksi() {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/transaksi`);
+      setTransaksi(response.data.data || []);
+    } catch (error) {
+      console.error('Error fetching transaksi data:', error);
+      alert('Error fetching transaksi data');
+    }
+  }
+
+  // Function to handle showing the delete modal
   function handleShowDeleteModal(id) {
     setTransaksiIdToDelete(id);
     setShowModal(true);
   }
 
-  // Function to handle deleting the transaksi
-  async function handleDelete(id) {
+  // Function to handle showing the update status modal
+  function handleShowStatusModal(id, currentStatus) {
+    setTransaksiIdToUpdate(id);
+    setNewStatus(currentStatus);
+    setShowStatusModal(true);
+  }
+
+  // Function to handle updating the status
+  async function handleUpdateStatus() {
     try {
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/transaksi/${id}`, {
-        method: 'DELETE',
-      });
-      if (!response.ok) {
-        throw new Error('Failed to delete transaksi');
+      const response = await axios.put(
+        `${import.meta.env.VITE_BASE_URL}/transaksi/${transaksiIdToUpdate}/status`,
+        { newStatus } // Body request
+      );
+  
+      if (response.status === 200) {
+        alert('Status updated successfully');
+        setTransaksi(
+          transaksi.map((item) =>
+            item.id === transaksiIdToUpdate ? { ...item, statusTransaksi: newStatus } : item
+          )
+        );
+        setShowStatusModal(false); // Close modal
+      } else {
+        alert('Failed to update status');
       }
-      alert('Transaksi deleted');
-      setTransaksi(transaksi.filter((item) => item.id !== id)); // Remove deleted item from state
     } catch (error) {
-      console.error('Error deleting transaksi:', error);
-      alert('Error deleting transaksi');
+      console.error('Error updating transaksi status:', error);
+      alert('Error updating transaksi status');
     }
   }
+  
 
   return (
     <div className="container mt-4">
@@ -110,8 +120,15 @@ function TransaksiData() {
                     View
                   </Link>
                   <Button
+                    variant="success"
+                    onClick={() => handleShowStatusModal(item.id, item.statusTransaksi)}
+                    className="ms-2"
+                  >
+                    Update Status
+                  </Button>
+                  <Button
                     variant="danger"
-                    onClick={() => handleShowDeleteModal(item.id)} // Show modal on delete click
+                    onClick={() => handleShowDeleteModal(item.id)}
                     className="ms-2"
                   >
                     Delete
@@ -129,12 +146,24 @@ function TransaksiData() {
         </tbody>
       </Table>
 
-      {/* Include the Delete Confirmation Modal */}
+      {/* Delete Confirmation Modal */}
       <DeleteTransaksi
         show={showModal}
-        onClose={() => setShowModal(false)} // Close modal
-        onDelete={handleDelete} // Call handleDelete on confirmation
-        transaksiId={transaksiIdToDelete} // Pass the ID to the modal
+        onClose={() => setShowModal(false)}
+        onDelete={(id) => {
+          setShowModal(false);
+          setTransaksi(transaksi.filter((item) => item.id !== id));
+        }}
+        transaksiId={transaksiIdToDelete}
+      />
+
+      {/* Update Status Modal */}
+      <UpdateStatus
+        show={showStatusModal}
+        onClose={() => setShowStatusModal(false)}
+        onSave={handleUpdateStatus}
+        currentStatus={newStatus}
+        setNewStatus={setNewStatus}
       />
     </div>
   );

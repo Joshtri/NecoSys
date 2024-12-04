@@ -1,25 +1,26 @@
 import { NavLink, Link } from 'react-router-dom';
 import { useState } from 'react';
 import { Navbar, Nav, NavDropdown, Button, Collapse } from 'react-bootstrap';
-import { FaBars, FaTimes } from 'react-icons/fa'; // Icon for mobile menu
+import { FaBars, FaTimes, FaRecycle, FaUserCircle } from 'react-icons/fa'; // Icon tematik
 
 function CustomNavbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // Mobile menu state
 
   return (
-    <Navbar expand="lg" className="shadow-md bg-white w-full">
+    <Navbar expand="lg" className="shadow-md bg-white w-full border-b border-green-200">
       <div className="container-fluid d-flex justify-content-between py-3 px-4">
         {/* Left: Brand Logo */}
         <Link
           to="/"
-          className="navbar-brand text-xl font-semibold text-blue-600 hover:text-blue-800"
+          className="navbar-brand text-xl font-bold text-green-700 hover:text-green-900 d-flex align-items-center"
         >
-          SI | Pengolahan Bank Sampah
+          <FaRecycle size={24} className="me-2" />
+          SI | Eco Bank
         </Link>
 
         {/* Mobile Menu Toggle */}
         <Button
-          className="d-lg-none text-gray-100"
+          className="d-lg-none text-green-700"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
           {isMobileMenuOpen ? <FaTimes size={28} /> : <FaBars size={28} />}
@@ -28,47 +29,49 @@ function CustomNavbar() {
         {/* Center: Navigation Links (Desktop) */}
         <Navbar.Collapse className="justify-content-end">
           <Nav className="d-none d-lg-flex">
-            {/* Main Dashboard Link */}
+            {/* Dashboard */}
             <NavLink
               to="/dashboard"
               className={({ isActive }) =>
                 isActive
-                  ? 'text-blue-700 font-semibold nav-link'
-                  : 'text-gray-600 hover:text-blue-500 nav-link'
+                  ? 'text-green-800 bg-green-100 rounded px-3 py-2 font-semibold nav-link'
+                  : 'text-gray-600 hover:text-green-600 px-3 py-2 nav-link'
               }
             >
               Dashboard
             </NavLink>
 
             {/* Admin Data Dropdown */}
-            <NavDropdown title="Admin Data" id="admin-data-dropdown">
-              {/* Pengguna Management */}
+            <NavDropdown title="Admin Data" id="admin-data-dropdown" className="text-gray-600">
               <NavDropdown.Item as={Link} to="/admin/pengguna">
                 Pengguna
               </NavDropdown.Item>
-              {/* Anggota Management */}
               <NavDropdown.Item as={Link} to="/admin/anggota">
                 Anggota
               </NavDropdown.Item>
-              {/* Kategori Sampah Management */}
               <NavDropdown.Item as={Link} to="/admin/kategori-sampah">
                 Kategori Sampah
               </NavDropdown.Item>
-              {/* Item Sampah Management */}
               <NavDropdown.Item as={Link} to="/admin/item-sampah">
                 Item Sampah
               </NavDropdown.Item>
-              {/* Transaksi Management */}
               <NavDropdown.Item as={Link} to="/admin/transaksi">
                 Transaksi
               </NavDropdown.Item>
             </NavDropdown>
 
             {/* User Dropdown */}
-            <NavDropdown title="John Doe" id="basic-nav-dropdown">
-              <NavDropdown.Item href="#action/3.1">My Profile</NavDropdown.Item>
+            <NavDropdown
+              title={<FaUserCircle size={20} className="text-green-700" />}
+              id="user-nav-dropdown"
+            >
+              <NavDropdown.Item as={Link} to="/profile">
+                My Profile
+              </NavDropdown.Item>
               <NavDropdown.Divider />
-              <NavDropdown.Item href="#action/3.2">Logout</NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/logout">
+                Logout
+              </NavDropdown.Item>
             </NavDropdown>
           </Nav>
         </Navbar.Collapse>
@@ -76,13 +79,13 @@ function CustomNavbar() {
 
       {/* Mobile Menu */}
       <Collapse in={isMobileMenuOpen}>
-        <div className="d-lg-none flex flex-column px-6 py-4 bg-white border-top">
+        <div className="d-lg-none flex flex-column px-6 py-4 bg-green-50 border-top border-green-200">
           <NavLink
             to="/dashboard"
             className={({ isActive }) =>
               isActive
-                ? 'text-blue-700 font-semibold w-100'
-                : 'text-gray-600 hover:text-blue-500 w-100'
+                ? 'text-green-800 bg-green-100 rounded w-100 px-3 py-2'
+                : 'text-gray-600 hover:text-green-600 w-100 px-3 py-2'
             }
             onClick={() => setIsMobileMenuOpen(false)}
           >
@@ -90,61 +93,57 @@ function CustomNavbar() {
           </NavLink>
 
           {/* Admin Data Menu for Mobile */}
-          <NavDropdown title="Admin Data" className="w-100">
+          <NavDropdown title="Admin Data" className="w-100 text-gray-600">
             <NavLink
               to="/admin/pengguna"
               className={({ isActive }) =>
                 isActive
-                  ? 'text-blue-700 font-semibold w-100'
-                  : 'text-gray-600 hover:text-blue-500 w-100'
+                  ? 'text-green-800 bg-green-100 rounded w-100 px-3 py-2'
+                  : 'text-gray-600 hover:text-green-600 w-100 px-3 py-2'
               }
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Pengguna
             </NavLink>
-
             <NavLink
               to="/admin/anggota"
               className={({ isActive }) =>
                 isActive
-                  ? 'text-blue-700 font-semibold w-100'
-                  : 'text-gray-600 hover:text-blue-500 w-100'
+                  ? 'text-green-800 bg-green-100 rounded w-100 px-3 py-2'
+                  : 'text-gray-600 hover:text-green-600 w-100 px-3 py-2'
               }
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Anggota
             </NavLink>
-
             <NavLink
               to="/admin/kategori-sampah"
               className={({ isActive }) =>
                 isActive
-                  ? 'text-blue-700 font-semibold w-100'
-                  : 'text-gray-600 hover:text-blue-500 w-100'
+                  ? 'text-green-800 bg-green-100 rounded w-100 px-3 py-2'
+                  : 'text-gray-600 hover:text-green-600 w-100 px-3 py-2'
               }
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Kategori Sampah
             </NavLink>
-
             <NavLink
               to="/admin/item-sampah"
               className={({ isActive }) =>
                 isActive
-                  ? 'text-blue-700 font-semibold w-100'
-                  : 'text-gray-600 hover:text-blue-500 w-100'
+                  ? 'text-green-800 bg-green-100 rounded w-100 px-3 py-2'
+                  : 'text-gray-600 hover:text-green-600 w-100 px-3 py-2'
               }
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Item Sampah
             </NavLink>
-
             <NavLink
               to="/admin/transaksi"
               className={({ isActive }) =>
                 isActive
-                  ? 'text-blue-700 font-semibold w-100'
-                  : 'text-gray-600 hover:text-blue-500 w-100'
+                  ? 'text-green-800 bg-green-100 rounded w-100 px-3 py-2'
+                  : 'text-gray-600 hover:text-green-600 w-100 px-3 py-2'
               }
               onClick={() => setIsMobileMenuOpen(false)}
             >
@@ -152,11 +151,11 @@ function CustomNavbar() {
             </NavLink>
           </NavDropdown>
 
-          {/* User Profile & Logout (Dummy Content for UI) */}
-          <button className="text-gray-600 hover:text-blue-500 w-100 text-left">
+          {/* Profile & Logout */}
+          <button className="text-gray-600 hover:text-green-700 w-100 text-left mt-2">
             Profile
           </button>
-          <button className="text-gray-600 hover:text-red-500 w-100 text-left">
+          <button className="text-gray-600 hover:text-red-500 w-100 text-left mt-2">
             Logout
           </button>
         </div>
