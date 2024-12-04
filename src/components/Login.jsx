@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Button, Form, Container, Row, Col, Toast } from 'react-bootstrap';
+import { Button, Form, Container, Row, Col } from 'react-bootstrap';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -35,7 +35,9 @@ function Login() {
 
     // Validasi password sebelum login
     if (!validatePassword(data.password)) {
-      setError('Password harus minimal 8 karakter dan mengandung huruf besar, huruf kecil, angka, dan simbol.');
+      setError(
+        'Password harus minimal 8 karakter dan mengandung huruf besar, huruf kecil, angka, dan simbol.'
+      );
       return;
     }
 
@@ -70,28 +72,35 @@ function Login() {
   };
 
   return (
-    <Container fluid className="h-100 d-flex justify-content-center align-items-center bg-light">
+    <Container fluid className="vh-100 d-flex align-items-center justify-content-center bg-light">
       <ToastContainer position="top-right" autoClose={3000} />
-      <Row className="w-100">
-        {/* Left Side: Image or Welcome Message */}
-        <Col xs={12} md={6} className="bg-primary text-white p-4 d-flex flex-column justify-content-center align-items-center">
-          {/* Uncomment logo if needed */}
-          {/* <img src={logoYayasan} alt="Logo Yayasan" className="mb-4 w-40 h-40 object-contain" /> */}
-          <h2 className="mb-2 font-weight-bold">Selamat Datang</h2>
-          <p className="text-center">Silakan masuk untuk melanjutkan dan menikmati layanan kami.</p>
+      <Row className="w-100 shadow-lg" style={{ maxWidth: '900px' }}>
+        {/* Left Side: Welcome Section */}
+        <Col
+          xs={12}
+          md={6}
+          className="bg-primary text-white p-5 d-flex flex-column justify-content-center align-items-center rounded-start"
+        >
+          <h2 className="mb-3 fw-bold">Selamat Datang!</h2>
+          <p className="text-center">
+            Masuk untuk menikmati layanan terbaik kami dan mengelola informasi dengan mudah.
+          </p>
         </Col>
 
         {/* Right Side: Login Form */}
-        <Col xs={12} md={6} className="bg-white p-5">
-          <h2 className="text-center mb-4">Salam hangat kembali!</h2>
-          <p className="text-center text-muted">Kami sangat senang Anda kembali bersama kami.</p>
+        <Col xs={12} md={6} className="bg-white p-5 rounded-end">
+          <h2 className="text-center mb-4 fw-bold">Masuk ke Akun Anda</h2>
+          <p className="text-center text-muted mb-4">
+            Kami senang melihat Anda kembali bersama kami.
+          </p>
 
           <Form onSubmit={handleSubmit}>
-            <Form.Group controlId="email">
-              <Form.Label>Email address</Form.Label>
+            {/* Email Input */}
+            <Form.Group controlId="email" className="mb-3">
+              <Form.Label>Email Address</Form.Label>
               <Form.Control
                 type="email"
-                placeholder="Enter email"
+                placeholder="Masukkan email Anda"
                 name="email"
                 value={data.email}
                 onChange={handleChange}
@@ -99,11 +108,12 @@ function Login() {
               />
             </Form.Group>
 
-            <Form.Group controlId="password" className="mt-3">
+            {/* Password Input */}
+            <Form.Group controlId="password" className="mb-3">
               <Form.Label>Password</Form.Label>
               <Form.Control
                 type="password"
-                placeholder="Enter password"
+                placeholder="Masukkan password Anda"
                 name="password"
                 value={data.password}
                 onChange={handleChange}
@@ -111,24 +121,28 @@ function Login() {
               />
             </Form.Group>
 
-            {error && <div className="text-danger mt-2">{error}</div>}
+            {/* Error Message */}
+            {error && <div className="text-danger mb-3">{error}</div>}
 
-            <div className="d-flex justify-content-between align-items-center mt-4">
-              <Form.Check type="checkbox" id="remember" label="Remember Me" />
-              <Link to="/forgot-password" className="text-sm text-primary">
-                Forgot Password?
+            {/* Remember Me and Forgot Password */}
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <Form.Check type="checkbox" label="Remember Me" id="remember" />
+              <Link to="/forgot-password" className="text-primary">
+                Lupa Password?
               </Link>
             </div>
 
-            <Button type="submit" className="w-100 mt-4">
-              Login
+            {/* Login Button */}
+            <Button type="submit" className="w-100 mb-3" variant="primary">
+              Masuk
             </Button>
           </Form>
 
-          <div className="text-center mt-3">
-            <span className="text-muted">Don't have an account? </span>
-            <Link to="/auth/signup" className="text-primary">
-              Sign Up
+          {/* Sign Up Redirect */}
+          <div className="text-center mt-4">
+            <span className="text-muted">Belum punya akun? </span>
+            <Link to="/auth/signup" className="text-primary fw-bold">
+              Daftar Sekarang
             </Link>
           </div>
         </Col>
