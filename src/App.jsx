@@ -14,6 +14,7 @@ import AddTransaksiPage from './pages/Transaksi/AddTransaksiPage'
 import ViewTransaksiPage from './pages/Transaksi/ViewTransaksiPage'
 import PengepulPage from './pages/Pengepul/PengepulPage'
 import ViewPengepulPage from './pages/Pengepul/ViewPengepulPage'
+import NotFoundPage from './pages/NotFoundPage'
 
 function App() {
 
@@ -37,7 +38,8 @@ function App() {
           <Route path='/admin/pengepul' element={<PengepulPage/>}/>
           <Route path="/admin/pengepul/:id" element={<ViewPengepulPage />} />
 
-          
+          {/* Rute wildcard untuk halaman 404 */}
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </BrowserRouter>
     </>
