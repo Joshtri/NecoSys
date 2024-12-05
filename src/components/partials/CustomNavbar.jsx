@@ -2,8 +2,10 @@ import { NavLink, Link } from 'react-router-dom';
 import { useState } from 'react';
 import { Navbar, Nav, NavDropdown, Button, Collapse } from 'react-bootstrap';
 import { FaBars, FaTimes, FaRecycle, FaUserCircle } from 'react-icons/fa'; // Icon tematik
+import useUserProfile from '../../hooks/useUserProfile';  // Import custom hook
 
 function CustomNavbar() {
+  const userProfile = useUserProfile();  // Use custom hook to get user profile
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // Mobile menu state
 
   return (
