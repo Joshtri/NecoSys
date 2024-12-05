@@ -29,47 +29,46 @@ function Login() {
       hasSymbol
     );
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validasi password sebelum login
-    if (!validatePassword(data.password)) {
-      setError(
-        'Password harus minimal 8 karakter dan mengandung huruf besar, huruf kecil, angka, dan simbol.'
-      );
-      return;
-    }
-
     try {
-      const url = `${import.meta.env.VITE_BASE_URL}/api/v1/auth`;
-      const response = await axios.post(url, data);
-      console.log('Full API response:', response);
+        const url = `${import.meta.env.VITE_BASE_URL}/pengguna/login`;
+        const payload = {
+            email: data.email,
+            kataSandi: data.password, // Ubah key dari 'password' menjadi 'kataSandi'
+        };
 
-      const res = response.data;
+        console.log('Data dikirim ke backend:', payload); // Debugging
 
-      // Simpan token dan informasi user ke localStorage
-      localStorage.setItem('token', res.token);
-      localStorage.setItem('firstName', res.user.firstName);
-      localStorage.setItem('lastName', res.user.lastName);
-      localStorage.setItem('role', res.user.role);
-      localStorage.setItem('id', res.user.id);
+        const response = await axios.post(url, payload);
+        console.log('Full API response:', response);
 
-      toast.success('Login berhasil!');
-      setTimeout(() => {
-        navigate('/my/author/dashboard');
-      }, 2000);
+        const res = response.data;
+
+        // Simpan token dan informasi user ke localStorage
+        localStorage.setItem('token', res.token);
+        localStorage.setItem('role', res.user.role); // Simpan role pengguna
+        localStorage.setItem('nama', res.user.nama); // Simpan nama pengguna
+
+        toast.success('Login berhasil!');
+        setTimeout(() => {
+            if (res.user.role === 'pengepul') {
+                navigate('/pengepul/dashboard'); // Halaman dashboard pengepul
+            } else if (res.user.role === 'admin') {
+                navigate('/admin/dashboard'); // Halaman dashboard admin
+            } else {
+                navigate('/'); // Halaman default
+            }
+        }, 2000);
     } catch (error) {
-      console.error('Error occurred:', error);
-      if (
-        error.response &&
-        error.response.status >= 400 &&
-        error.response.status <= 500
-      ) {
-        setError(error.response.data.message);
-      }
+        console.error('Error occurred:', error);
+        setError(
+            error.response?.data?.error || 'Terjadi kesalahan pada server.'
+        );
     }
-  };
+};
+
 
   return (
     <Container fluid className="vh-100 d-flex align-items-center justify-content-center bg-light">
