@@ -13,6 +13,7 @@ import TransaksiPage from './pages/Transaksi/TransaksiPage'
 import AddTransaksiPage from './pages/Transaksi/AddTransaksiPage'
 import ViewTransaksiPage from './pages/Transaksi/ViewTransaksiPage'
 import PengepulPage from './pages/Pengepul/PengepulPage'
+import ViewPengepulPage from './pages/Pengepul/ViewPengepulPage'
 
 function App() {
 
@@ -34,6 +35,8 @@ function App() {
           <Route path="/transaksi/view/:id" element={<ViewTransaksiPage />} />
 
           <Route path='/admin/pengepul' element={<PengepulPage/>}/>
+          <Route path="/admin/pengepul/:id" element={<ViewPengepulPage />} />
+
           
         </Routes>
       </BrowserRouter>
