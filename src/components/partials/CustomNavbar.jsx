@@ -3,10 +3,18 @@ import { useState } from 'react';
 import { Navbar, Nav, NavDropdown, Button, Collapse } from 'react-bootstrap';
 import { FaBars, FaTimes, FaRecycle, FaUserCircle } from 'react-icons/fa'; // Icon tematik
 import useUserProfile from '../../hooks/useUserProfile'; // Import custom hook
+import { useNavigate } from 'react-router-dom';
 
 function CustomNavbar() {
   const userProfile = useUserProfile(); // Get user profile data
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // Mobile menu state
+  const navigate = useNavigate();
+
+
+  const handleLogout = () => {
+    localStorage.removeItem('token'); // Hapus token
+    navigate('/'); // Redirect ke halaman login
+  };
 
   return (
     <Navbar expand="lg" className="shadow-md bg-white w-full border-b border-green-200">
@@ -97,9 +105,8 @@ function CustomNavbar() {
                 My Profile
               </NavDropdown.Item>
               <NavDropdown.Divider />
-              <NavDropdown.Item as={Link} to="/logout">
-                Logout
-              </NavDropdown.Item>
+              <NavDropdown.Item onClick={handleLogout}>Logout</NavDropdown.Item>
+
             </NavDropdown>
           </Nav>
         </Navbar.Collapse>
@@ -187,9 +194,7 @@ function CustomNavbar() {
           <button className="text-gray-600 hover:text-green-700 w-100 text-left mt-2">
             Profile
           </button>
-          <button className="text-gray-600 hover:text-red-500 w-100 text-left mt-2">
-            Logout
-          </button>
+          <NavDropdown.Item onClick={handleLogout}>Logout</NavDropdown.Item>
         </div>
       </Collapse>
     </Navbar>
