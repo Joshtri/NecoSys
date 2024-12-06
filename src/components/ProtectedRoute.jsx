@@ -9,7 +9,7 @@ const ProtectedRoute = ({ element: Component, allowedRoles }) => {
 
   // Jika user belum login, arahkan ke halaman login
   if (!token) {
-    return <Navigate to="/masuk" />;
+    return <Navigate to="/" />;
   }
 
   // Jika role tidak diizinkan, tampilkan halaman 404
