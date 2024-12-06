@@ -2,17 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { Form, Button, Container, Row, Col, ListGroup, Card } from 'react-bootstrap';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import useUserProfile from '../../hooks/useUserProfile';
 
 function AddTransaksi() {
   const [anggotaList, setAnggotaList] = useState([]);
   const [itemSampahList, setItemSampahList] = useState([]);
+  const [pengepulList, setPengepulList] = useState([]); // Pengepul data for admin selection
+  const [selectedPengepul, setSelectedPengepul] = useState(''); // Selected pengepul
   const [selectedAnggota, setSelectedAnggota] = useState('');
   const [selectedItemSampah, setSelectedItemSampah] = useState('');
   const [jumlah, setJumlah] = useState('');
   const [cart, setCart] = useState([]);
+  const userProfile = useUserProfile();
   const navigate = useNavigate();
 
-  // Fetch anggota (members) and item sampah (waste items) from the API
+  // Fetch anggota, item sampah, and pengepul (if needed)
   useEffect(() => {
     const fetchAnggota = async () => {
       try {
@@ -36,18 +40,27 @@ function AddTransaksi() {
       }
     };
 
+    const fetchPengepul = async () => {
+      if (userProfile.role !== 'pengepul') {
+        try {
+          const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/pengepul-diterima`); // Call real API
+          setPengepulList(response.data.data);
+        } catch (error) {
+          console.error('Error fetching pengepul data', error);
+        }
+      }
+    };
+
     fetchAnggota();
     fetchItemSampah();
-  }, []);
+    fetchPengepul();
+  }, [userProfile.role]);
 
-  // Calculate total price based on quantity and item price
   const calculateTotalPrice = (itemId, quantity) => {
     const selectedItem = itemSampahList.find((item) => item.id === itemId);
-    const totalPrice = selectedItem ? selectedItem.hargaPerKg * quantity : 0;
-    return totalPrice;
+    return selectedItem ? selectedItem.hargaPerKg * quantity : 0;
   };
 
-  // Add item to cart
   const handleAddToCart = () => {
     if (!selectedItemSampah || !jumlah || jumlah <= 0) {
       alert('Please select an item and enter a valid quantity');
@@ -55,56 +68,71 @@ function AddTransaksi() {
     }
 
     const total = calculateTotalPrice(selectedItemSampah, jumlah);
-
     const newCartItem = { itemId: selectedItemSampah, jumlah, totalHarga: total };
 
-    // Add the item to the cart
     setCart([...cart, newCartItem]);
-
-    // Reset inputs after adding to the cart
     setSelectedItemSampah('');
     setJumlah('');
   };
 
-  // Handle form submission
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-  
-    // Calculate the total of all items in the cart
+
     const totalTransaksi = cart.reduce((sum, item) => sum + item.totalHarga, 0);
-  
+    const pengepulId = userProfile.role === 'pengepul' ? userProfile.id : selectedPengepul;
+
+    if (!pengepulId) {
+      alert('Please select a pengepul');
+      return;
+    }
+
     const newTransaksi = {
+      pengepulId, // Pengepul ID determined dynamically
       anggotaId: selectedAnggota,
-      totalTransaksi: totalTransaksi,  // Pastikan totalTransaksi dihitung dengan benar
+      totalTransaksi,
       itemTransaksi: cart.map((item) => ({
-        itemSampahId: item.itemId,  // ID item sampah
-        kuantitas: parseFloat(item.jumlah),  // Pastikan kuantitas adalah angka
-        totalHarga: parseFloat(item.totalHarga),  // Pastikan totalHarga adalah angka
+        itemSampahId: item.itemId,
+        kuantitas: parseFloat(item.jumlah),
+        totalHarga: parseFloat(item.totalHarga),
       })),
     };
-  
-    console.log('New Transaksi Data:', newTransaksi);  // Debugging log untuk memeriksa data yang dikirim
-    
-    // if (newTransaksi.items.length === 0) {
-    //   alert("Cart cannot be empty.");
-    //   return;
-    // }
-  
+
     try {
       const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/transaksi`, newTransaksi);
-      console.log('Transaction response:', response.data);  // Debugging log
       navigate('/admin/transaksi');
     } catch (error) {
       console.error('Error adding transaksi', error);
     }
   };
-  
 
   return (
     <Container className="mt-4">
       <h2 className="mb-4">Add New Transaksi</h2>
       <Form onSubmit={handleFormSubmit}>
-        {/* Select Anggota (Member) */}
+        {/* Select Pengepul (Only visible for admin) */}
+        {userProfile.role !== 'pengepul' && (
+          <Row className="mb-4">
+            <Col md={6}>
+              <Form.Group controlId="formPengepul">
+                <Form.Label>Pengepul</Form.Label>
+                <Form.Control
+                  as="select"
+                  value={selectedPengepul}
+                  onChange={(e) => setSelectedPengepul(e.target.value)}
+                >
+                  <option value="">Select Pengepul</option>
+                  {pengepulList.map((pengepul) => (
+                    <option key={pengepul.id} value={pengepul.id}>
+                      {pengepul.namaBankSampah || pengepul.nama}  {pengepul.id}
+                    </option>
+                  ))}
+                </Form.Control>
+              </Form.Group>
+            </Col>
+          </Row>
+        )}
+
+        {/* Select Anggota */}
         <Row className="mb-4">
           <Col md={6}>
             <Form.Group controlId="formAnggota">
@@ -115,21 +143,17 @@ function AddTransaksi() {
                 onChange={(e) => setSelectedAnggota(e.target.value)}
               >
                 <option value="">Select Anggota</option>
-                {anggotaList.length > 0 ? (
-                  anggotaList.map((anggota) => (
-                    <option key={anggota.id} value={anggota.id}>
-                      {anggota.nama}
-                    </option>
-                  ))
-                ) : (
-                  <option disabled>No Anggota Available</option>
-                )}
+                {anggotaList.map((anggota) => (
+                  <option key={anggota.id} value={anggota.id}>
+                    {anggota.nama}
+                  </option>
+                ))}
               </Form.Control>
             </Form.Group>
           </Col>
         </Row>
 
-        {/* Select Item Sampah and Quantity */}
+        {/* Select Item Sampah */}
         <Row className="mb-4">
           <Col md={6}>
             <Form.Group controlId="formItemSampah">
@@ -140,19 +164,14 @@ function AddTransaksi() {
                 onChange={(e) => setSelectedItemSampah(e.target.value)}
               >
                 <option value="">Select Item Sampah</option>
-                {itemSampahList.length > 0 ? (
-                  itemSampahList.map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {item.nama} - {item.hargaPerKg} per kg
-                    </option>
-                  ))
-                ) : (
-                  <option disabled>No Item Sampah Available</option>
-                )}
+                {itemSampahList.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.nama} - {item.hargaPerKg} per kg
+                  </option>
+                ))}
               </Form.Control>
             </Form.Group>
           </Col>
-
           <Col md={6}>
             <Form.Group controlId="formJumlah">
               <Form.Label>Jumlah (Kg)</Form.Label>
