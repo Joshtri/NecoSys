@@ -54,9 +54,9 @@ function Login() {
         toast.success('Login berhasil!');
         setTimeout(() => {
             if (res.user.role === 'pengepul') {
-                navigate('/pengepul/dashboard'); // Halaman dashboard pengepul
+                navigate('/dashboard'); // Halaman dashboard pengepul
             } else if (res.user.role === 'admin') {
-                navigate('/admin/dashboard'); // Halaman dashboard admin
+                navigate('/dashboard'); // Halaman dashboard admin
             } else {
                 navigate('/'); // Halaman default
             }
