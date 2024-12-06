@@ -15,6 +15,7 @@ function Dashboard() {
         <p><strong>Email:</strong> {userProfile.email}</p>
         {userProfile.role === 'pengepul' && (
           <>
+            <p><strong>Id:</strong> {userProfile.id || '-'}</p>
             <p><strong>No Telepon:</strong> {userProfile.noTelepon || '-'}</p>
             <p><strong>Alamat:</strong> {userProfile.alamat || '-'}</p>
             <p><strong>Nama Bank Sampah:</strong> {userProfile.namaBankSampah || '-'}</p>
