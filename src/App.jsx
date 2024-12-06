@@ -23,7 +23,7 @@ function App() {
     <>
       <BrowserRouter>
         <Routes>
-          <Route path='/dashboard' element={<DashboardPage/>}/>
+          <Route path='/dashboard' element={<ProtectedRoute element={DashboardPage} allowedRoles={['admin', 'pengepul']}/>}/>
           <Route path='/' element={<Login/>}/>
 
           {/* <Route path="/admin/pengguna" element={<PenggunaPage />} />
