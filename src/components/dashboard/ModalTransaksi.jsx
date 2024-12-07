@@ -9,59 +9,72 @@ function ModalTransaksi({ show, onHide, pengepulId, role }) {
   const [loading, setLoading] = useState(true);
   const [selectedStatus, setSelectedStatus] = useState('all');
 
+  const fetchTransaksiData = async () => {
+    try {
+      setLoading(true);
+      const baseURL = import.meta.env.VITE_BASE_URL;
+  
+      // Log untuk memastikan selectedStatus
+      console.log('Fetching transactions for status:', selectedStatus);
+  
+      // Fetch transactions berdasarkan statusTransaksi
+      const transactionsRes = await axios.get(`${baseURL}/transaksi-status`, {
+        params: {
+          role,
+          pengepulId: role === 'pengepul' ? pengepulId : undefined,
+          statusTransaksi: selectedStatus !== 'all' ? selectedStatus : undefined,
+        },
+      });
+  
+      // Log data transaksi yang diterima
+      console.log('Transactions fetched:', transactionsRes.data.data);
+      setTransactions(transactionsRes.data.data || []);
+  
+      // Fetch counts untuk setiap statusTransaksi
+      const statuses = ['pending', 'success', 'failed', 'cancelled'];
+      const statusCountsPromises = statuses.map((status) =>
+        axios
+          .get(
+            `${baseURL}/transaksi-count/user/${pengepulId || 'all'}/status/${status}`,
+            {
+              params: {
+                role,
+                pengepulId: role === 'pengepul' ? pengepulId : undefined,
+              },
+            }
+          )
+          .then((res) => ({ status, count: res.data.total }))
+          .catch((error) => {
+            console.error(`Error fetching count for status ${status}:`, error);
+            return { status, count: 0 };
+          })
+      );
+  
+      const counts = await Promise.all(statusCountsPromises);
+      const countsObject = counts.reduce((acc, { status, count }) => {
+        acc[status] = count;
+        return acc;
+      }, {});
+  
+      // Log statistik transaksi
+      console.log('Status counts fetched:', countsObject);
+      setStatusCounts(countsObject);
+  
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching transaction data:', error);
+      setLoading(false);
+    }
+  };
+  
+  
+
+  // Fetch data saat `show` atau `selectedStatus` berubah
   useEffect(() => {
-    const fetchTransaksiData = async () => {
-      try {
-        const baseURL = import.meta.env.VITE_BASE_URL;
-
-        // Fetch transactions
-        const transactionsRes = await axios.get(`${baseURL}/transaksi`, {
-          params: {
-            role,
-            pengepulId: role === 'pengepul' ? pengepulId : undefined,
-            statusTransaksi: selectedStatus !== 'all' ? selectedStatus : undefined,
-          },
-        });
-        setTransactions(transactionsRes.data.data || []);
-
-        // Fetch counts using endpoint '/transaksi-count/user/:pengepulId/status/:status'
-        const statuses = ['pending', 'success', 'failed', 'cancelled'];
-        const statusCountsPromises = statuses.map((status) =>
-          axios
-            .get(
-              `${baseURL}/transaksi-count/user/${pengepulId || 'all'}/status/${status}`,
-              {
-                params: {
-                  role,
-                  pengepulId: role === 'pengepul' ? pengepulId : undefined,
-                },
-              }
-            )
-            .then((res) => ({ status, count: res.data.total }))
-            .catch((error) => {
-              console.error(`Error fetching count for status ${status}:`, error);
-              return { status, count: 0 };
-            })
-        );
-
-        const counts = await Promise.all(statusCountsPromises);
-        const countsObject = counts.reduce((acc, { status, count }) => {
-          acc[status] = count;
-          return acc;
-        }, {});
-        setStatusCounts(countsObject);
-
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching transaction data:', error);
-        setLoading(false);
-      }
-    };
-
     if (show) {
       fetchTransaksiData();
     }
-  }, [show, pengepulId, role, selectedStatus]);
+  }, [show, selectedStatus]);
 
   const renderStatus = (status) => {
     switch (status) {
@@ -123,7 +136,7 @@ function ModalTransaksi({ show, onHide, pengepulId, role }) {
                       variant={selectedStatus === status ? 'primary' : 'outline-primary'}
                       size="sm"
                       className="me-2"
-                      onClick={() => setSelectedStatus(status)}
+                      onClick={() => setSelectedStatus(status)} // Update selectedStatus
                     >
                       {status === 'all' ? 'Tampilkan Semua' : status.charAt(0).toUpperCase() + status.slice(1)}
                     </Button>
@@ -149,7 +162,7 @@ function ModalTransaksi({ show, onHide, pengepulId, role }) {
                     <tr key={transaction.id}>
                       <td>{transaction.id}</td>
                       <td>{renderStatus(transaction.statusTransaksi)}</td>
-                      <td>{transaction.totalTransaksi.toLocaleString('id-ID')}</td>
+                      <td>Rp. {transaction.totalTransaksi.toLocaleString('id-ID')}</td>
                       <td>{new Date(transaction.tanggalTransaksi).toLocaleDateString()}</td>
                       <td>{transaction.anggota?.nama || 'Tidak diketahui'}</td>
                       <td>{transaction.pengepul?.namaBankSampah || 'Tidak diketahui'}</td>
