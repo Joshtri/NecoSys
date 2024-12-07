@@ -32,23 +32,24 @@ function ModalTransaksi({ show, onHide, pengepulId, role }) {
   
       // Fetch counts untuk setiap statusTransaksi
       const statuses = ['pending', 'success', 'failed', 'cancelled'];
-      const statusCountsPromises = statuses.map((status) =>
-        axios
-          .get(
-            `${baseURL}/transaksi-count/user/${pengepulId || 'all'}/status/${status}`,
-            {
-              params: {
-                role,
-                pengepulId: role === 'pengepul' ? pengepulId : undefined,
-              },
-            }
-          )
+      const statusCountsPromises = statuses.map((status) => {
+        const endpoint = role === 'pengepul'
+          ? `${baseURL}/transaksi-count/user/${pengepulId || 'all'}/status/${status}`
+          : `${baseURL}/transaksi-count/${status}`;
+      
+        const params = role === 'pengepul'
+          ? { role, pengepulId }
+          : { role };
+      
+        return axios
+          .get(endpoint, { params })
           .then((res) => ({ status, count: res.data.total }))
           .catch((error) => {
             console.error(`Error fetching count for status ${status}:`, error);
             return { status, count: 0 };
-          })
-      );
+          });
+      });
+      
   
       const counts = await Promise.all(statusCountsPromises);
       const countsObject = counts.reduce((acc, { status, count }) => {
@@ -108,79 +109,82 @@ function ModalTransaksi({ show, onHide, pengepulId, role }) {
   };
 
   return (
-    <Modal show={show} onHide={onHide} centered size="xl">
-      <Modal.Header closeButton>
-        <Modal.Title>Rincian Total Transaksi</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        {loading ? (
-          <div className="text-center">
-            <Spinner animation="border" />
-            <p className="mt-2">Loading data...</p>
-          </div>
-        ) : (
-          <div>
-            <Card className="shadow-sm mb-4">
-              <Card.Body>
-                <h5 className="mb-4">Statistik Transaksi</h5>
-                <ul className="list-unstyled">
-                  <li>Pending: {statusCounts.pending || 0} transaksi</li>
-                  <li>Success: {statusCounts.success || 0} transaksi</li>
-                  <li>Failed: {statusCounts.failed || 0} transaksi</li>
-                  <li>Cancelled: {statusCounts.cancelled || 0} transaksi</li>
-                </ul>
-                <div className="mt-3">
-                  {['all', 'pending', 'success', 'failed', 'cancelled'].map((status) => (
-                    <Button
-                      key={status}
-                      variant={selectedStatus === status ? 'primary' : 'outline-primary'}
-                      size="sm"
-                      className="me-2"
-                      onClick={() => setSelectedStatus(status)} // Update selectedStatus
-                    >
-                      {status === 'all' ? 'Tampilkan Semua' : status.charAt(0).toUpperCase() + status.slice(1)}
-                    </Button>
-                  ))}
-                </div>
-              </Card.Body>
-            </Card>
+<Modal show={show} onHide={onHide} centered size="xl">
+  <Modal.Header closeButton>
+    <Modal.Title>Rincian Total Transaksi</Modal.Title>
+  </Modal.Header>
+  <Modal.Body>
+    {loading ? (
+      <div className="text-center">
+        <Spinner animation="border" />
+        <p className="mt-2">Loading data...</p>
+      </div>
+    ) : (
+      <div>
+        <Card className="shadow-sm mb-4">
+          <Card.Body>
+            <h5 className="mb-4">Statistik Transaksi</h5>
+            <ul className="list-unstyled">
+              <li>Pending: {statusCounts.pending || 0} transaksi</li>
+              <li>Success: {statusCounts.success || 0} transaksi</li>
+              <li>Failed: {statusCounts.failed || 0} transaksi</li>
+              <li>Cancelled: {statusCounts.cancelled || 0} transaksi</li>
+            </ul>
+            <div className="mt-3">
+              {['all', 'pending', 'success', 'failed', 'cancelled'].map((status) => (
+                <Button
+                  key={status}
+                  variant={selectedStatus === status ? 'primary' : 'outline-primary'}
+                  size="sm"
+                  className="me-2"
+                  onClick={() => setSelectedStatus(status)}
+                >
+                  {status === 'all' ? 'Tampilkan Semua' : status.charAt(0).toUpperCase() + status.slice(1)}
+                </Button>
+              ))}
+            </div>
+          </Card.Body>
+        </Card>
 
-            <Table bordered hover>
-              <thead>
-                <tr>
-                  <th>ID Transaksi</th>
-                  <th>Status</th>
-                  <th>Total Transaksi</th>
-                  <th>Tanggal Transaksi</th>
-                  <th>Nama Anggota</th>
-                  <th>Nama Pengepul</th>
-                </tr>
-              </thead>
-              <tbody>
-                {transactions.length > 0 ? (
-                  transactions.map((transaction) => (
-                    <tr key={transaction.id}>
-                      <td>{transaction.id}</td>
-                      <td>{renderStatus(transaction.statusTransaksi)}</td>
-                      <td>Rp. {transaction.totalTransaksi.toLocaleString('id-ID')}</td>
-                      <td>{new Date(transaction.tanggalTransaksi).toLocaleDateString()}</td>
-                      <td>{transaction.anggota?.nama || 'Tidak diketahui'}</td>
-                      <td>{transaction.pengepul?.namaBankSampah || 'Tidak diketahui'}</td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="6" className="text-center">
-                      Tidak ada transaksi untuk status ini.
-                    </td>
+        <div className="table-responsive">
+          <Table bordered hover>
+            <thead>
+              <tr>
+                <th>ID Transaksi</th>
+                <th>Status</th>
+                <th>Total Transaksi</th>
+                <th>Tanggal Transaksi</th>
+                <th>Nama Anggota</th>
+                <th>Nama Pengepul</th>
+              </tr>
+            </thead>
+            <tbody>
+              {transactions.length > 0 ? (
+                transactions.map((transaction) => (
+                  <tr key={transaction.id}>
+                    <td>{transaction.id}</td>
+                    <td>{renderStatus(transaction.statusTransaksi)}</td>
+                    <td>Rp. {transaction.totalTransaksi.toLocaleString('id-ID')}</td>
+                    <td>{new Date(transaction.tanggalTransaksi).toLocaleDateString()}</td>
+                    <td>{transaction.anggota?.nama || 'Tidak diketahui'}</td>
+                    <td>{transaction.pengepul?.namaBankSampah || 'Tidak diketahui'}</td>
                   </tr>
-                )}
-              </tbody>
-            </Table>
-          </div>
-        )}
-      </Modal.Body>
-    </Modal>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6" className="text-center">
+                    Tidak ada transaksi untuk status ini.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </Table>
+        </div>
+      </div>
+    )}
+  </Modal.Body>
+</Modal>
+
   );
 }
 
