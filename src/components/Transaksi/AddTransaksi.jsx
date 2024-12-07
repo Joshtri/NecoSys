@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Button, Container, Row, Col, ListGroup, Card } from 'react-bootstrap';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import Breadcrumbs from '../Breadcrumbs'; // Import Breadcrumbs component
 import useUserProfile from '../../hooks/useUserProfile';
 
 function AddTransaksi() {
   const [anggotaList, setAnggotaList] = useState([]);
   const [itemSampahList, setItemSampahList] = useState([]);
-  const [pengepulList, setPengepulList] = useState([]); // Pengepul data for admin selection
-  const [selectedPengepul, setSelectedPengepul] = useState(''); // Selected pengepul
+  const [pengepulList, setPengepulList] = useState([]);
+  const [selectedPengepul, setSelectedPengepul] = useState('');
   const [selectedAnggota, setSelectedAnggota] = useState('');
   const [selectedItemSampah, setSelectedItemSampah] = useState('');
   const [jumlah, setJumlah] = useState('');
@@ -16,7 +17,14 @@ function AddTransaksi() {
   const userProfile = useUserProfile();
   const navigate = useNavigate();
 
-  // Fetch anggota, item sampah, and pengepul (if needed)
+  // Breadcrumb paths
+  const breadcrumbPaths = [
+    { label: 'Dashboard', link: '/dashboard' },
+    { label: 'Data Transaksi', link: '/transaksi' },
+    { label: 'Add Transaksi', link: '/transaksi/add' },
+  ];
+
+  // Fetch anggota, item sampah, and pengepul
   useEffect(() => {
     const fetchAnggota = async () => {
       try {
@@ -43,7 +51,7 @@ function AddTransaksi() {
     const fetchPengepul = async () => {
       if (userProfile.role !== 'pengepul') {
         try {
-          const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/pengepul-diterima`); // Call real API
+          const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/pengepul-diterima`);
           setPengepulList(response.data.data);
         } catch (error) {
           console.error('Error fetching pengepul data', error);
@@ -87,7 +95,7 @@ function AddTransaksi() {
     }
 
     const newTransaksi = {
-      pengepulId, // Pengepul ID determined dynamically
+      pengepulId,
       anggotaId: selectedAnggota,
       totalTransaksi,
       itemTransaksi: cart.map((item) => ({
@@ -99,7 +107,7 @@ function AddTransaksi() {
 
     try {
       const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/transaksi`, newTransaksi);
-      navigate('/admin/transaksi');
+      navigate('/transaksi');
     } catch (error) {
       console.error('Error adding transaksi', error);
     }
@@ -107,9 +115,12 @@ function AddTransaksi() {
 
   return (
     <Container className="mt-4">
-      <h2 className="mb-4">Add New Transaksi</h2>
+      {/* Breadcrumbs */}
+      <Breadcrumbs paths={breadcrumbPaths} />
+
+      <h2 className="mb-4 text-center">Add New Transaksi</h2>
+      <hr />
       <Form onSubmit={handleFormSubmit}>
-        {/* Select Pengepul (Only visible for admin) */}
         {userProfile.role !== 'pengepul' && (
           <Row className="mb-4">
             <Col md={6}>
@@ -123,7 +134,7 @@ function AddTransaksi() {
                   <option value="">Select Pengepul</option>
                   {pengepulList.map((pengepul) => (
                     <option key={pengepul.id} value={pengepul.id}>
-                      {pengepul.namaBankSampah || pengepul.nama}  {pengepul.id}
+                      {pengepul.namaBankSampah || pengepul.nama}
                     </option>
                   ))}
                 </Form.Control>
@@ -132,7 +143,6 @@ function AddTransaksi() {
           </Row>
         )}
 
-        {/* Select Anggota */}
         <Row className="mb-4">
           <Col md={6}>
             <Form.Group controlId="formAnggota">
@@ -153,7 +163,6 @@ function AddTransaksi() {
           </Col>
         </Row>
 
-        {/* Select Item Sampah */}
         <Row className="mb-4">
           <Col md={6}>
             <Form.Group controlId="formItemSampah">
@@ -189,7 +198,6 @@ function AddTransaksi() {
           Add Item to Cart
         </Button>
 
-        {/* Cart Summary */}
         {cart.length > 0 && (
           <Card className="mt-4 p-3">
             <Card.Header as="h5">Cart Summary</Card.Header>
