@@ -1,63 +1,58 @@
+import React, { useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
-import { useState } from 'react';
-import { Navbar, Nav, NavDropdown, Button, Collapse } from 'react-bootstrap';
-import { FaBars, FaTimes, FaRecycle, FaUserCircle } from 'react-icons/fa'; // Icon tematik
-import useUserProfile from '../../hooks/useUserProfile'; // Import custom hook
+import { Navbar, Nav, NavDropdown, Button, Badge, Collapse } from 'react-bootstrap';
+import { FaBars, FaTimes, FaRecycle, FaUserCircle, FaBell } from 'react-icons/fa';
+import useUserProfile from '../../hooks/useUserProfile';
 import { useNavigate } from 'react-router-dom';
 
 function CustomNavbar() {
-  const userProfile = useUserProfile(); // Get user profile data
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // Mobile menu state
+  const userProfile = useUserProfile();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [notifications, setNotifications] = useState([
+    { id: 1, message: 'Transaksi baru diterima', type: 'info' },
+    { id: 2, message: 'Item sampah berhasil ditambahkan', type: 'success' },
+  ]);
   const navigate = useNavigate();
 
-
   const handleLogout = () => {
-    localStorage.removeItem('token'); // Hapus token
-    navigate('/'); // Redirect ke halaman login
+    localStorage.removeItem('token');
+    navigate('/');
   };
 
   return (
-    <Navbar expand="lg" className="shadow-md bg-white w-full border-b border-green-200">
-      <div className="container-fluid d-flex justify-content-between py-3 px-4">
-        {/* Left: Brand Logo */}
-        <Link
-          to="/"
-          className="navbar-brand text-xl font-bold text-green-700 hover:text-green-900 d-flex align-items-center"
-        >
-          SI |
-          <FaRecycle size={24} className="me-2 ms-2" />
-          {userProfile.role === 'pengepul' ? userProfile.namaBankSampah || 'Bank Sampah' : 'SI | ECO Bank'}
-        </Link>
+    <Navbar
+      expand="lg"
+      className="shadow-lg bg-white w-full border-b border-green-200 sticky-top"
+    >
+      <div className="container-fluid d-flex justify-content-between align-items-center py-3 px-4">
+        {/* Left: Brand & Navigation */}
+        <div className="d-flex align-items-center">
+          <Link
+            to="/dashboard"
+            className="navbar-brand text-xl font-bold text-green-700 hover:text-green-900 d-flex align-items-center me-4"
+          >
+            SI |
+            <FaRecycle size={24} className="me-2 ms-2" />
+            {userProfile.role === 'pengepul' ? userProfile.namaBankSampah || 'Bank Sampah' : '| ECO Bank'}
+          </Link>
 
-        {/* Mobile Menu Toggle */}
-        <Button
-          className="d-lg-none text-green-700"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        >
-          {isMobileMenuOpen ? <FaTimes size={28} /> : <FaBars size={28} />}
-        </Button>
-
-        {/* Center: Navigation Links (Desktop) */}
-        <Navbar.Collapse className="justify-content-end">
+          {/* Desktop Navigation Links */}
           <Nav className="d-none d-lg-flex">
-            {/* Dashboard */}
             <NavLink
               to="/dashboard"
               className={({ isActive }) =>
                 isActive
-                  ? 'text-green-800 bg-green-100 rounded px-3 py-2 font-semibold nav-link'
+                  ? 'bg-success text-white px-3 py-2 rounded nav-link'
                   : 'text-gray-600 hover:text-green-600 px-3 py-2 nav-link'
               }
             >
               Dashboard
             </NavLink>
-
-            {/* Shared Features (Kategori Sampah, Item Sampah, Transaksi) */}
             <NavLink
               to="/kategori-sampah"
               className={({ isActive }) =>
                 isActive
-                  ? 'text-green-800 bg-green-100 rounded px-3 py-2 font-semibold nav-link'
+                  ? 'bg-success text-white px-3 py-2 rounded nav-link'
                   : 'text-gray-600 hover:text-green-600 px-3 py-2 nav-link'
               }
             >
@@ -67,7 +62,7 @@ function CustomNavbar() {
               to="/item-sampah"
               className={({ isActive }) =>
                 isActive
-                  ? 'text-green-800 bg-green-100 rounded px-3 py-2 font-semibold nav-link'
+                  ? 'bg-success text-white px-3 py-2 rounded nav-link'
                   : 'text-gray-600 hover:text-green-600 px-3 py-2 nav-link'
               }
             >
@@ -77,39 +72,76 @@ function CustomNavbar() {
               to="/transaksi"
               className={({ isActive }) =>
                 isActive
-                  ? 'text-green-800 bg-green-100 rounded px-3 py-2 font-semibold nav-link'
+                  ? 'bg-success text-white px-3 py-2 rounded nav-link'
                   : 'text-gray-600 hover:text-green-600 px-3 py-2 nav-link'
               }
             >
               Transaksi
             </NavLink>
 
-            {/* Fitur Admin Data (Hanya Admin) */}
             {userProfile.role === 'admin' && (
               <NavDropdown title="Admin Data" id="admin-data-dropdown" className="text-gray-600">
                 <NavDropdown.Item as={Link} to="/admin/pengguna">
                   Pengguna
+                </NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/admin/pengepul">
+                  Pengepul
                 </NavDropdown.Item>
                 <NavDropdown.Item as={Link} to="/admin/anggota">
                   Anggota
                 </NavDropdown.Item>
               </NavDropdown>
             )}
-
-            {/* User Dropdown */}
-            <NavDropdown
-              title={<FaUserCircle size={20} className="text-green-700" />}
-              id="user-nav-dropdown"
-            >
-              <NavDropdown.Item as={Link} to="/my-profile">
-                My Profile
-              </NavDropdown.Item>
-              <NavDropdown.Divider />
-              <NavDropdown.Item onClick={handleLogout}>Logout</NavDropdown.Item>
-
-            </NavDropdown>
           </Nav>
-        </Navbar.Collapse>
+        </div>
+
+        {/* Right: Notifications & Profile */}
+        <div className="d-flex align-items-center">
+          {/* Notifications */}
+          <NavDropdown
+            title={
+              <div className="position-relative">
+                <FaBell size={22} className="text-green-700" />
+                {notifications.length > 0 && (
+                  <Badge bg="danger" className="position-absolute top-0 start-100 translate-middle">
+                    {notifications.length}
+                  </Badge>
+                )}
+              </div>
+            }
+            id="notification-dropdown"
+            align="end"
+          >
+            {notifications.length > 0 ? (
+              notifications.map((notif) => (
+                <NavDropdown.Item key={notif.id}>{notif.message}</NavDropdown.Item>
+              ))
+            ) : (
+              <NavDropdown.Item>Tidak ada notifikasi</NavDropdown.Item>
+            )}
+          </NavDropdown>
+
+          {/* User Dropdown */}
+          <NavDropdown
+            title={<FaUserCircle size={22} className="text-green-700 ms-3" />}
+            id="user-nav-dropdown"
+            align="end"
+          >
+            <NavDropdown.Item as={Link} to="/my-profile">
+              My Profile
+            </NavDropdown.Item>
+            <NavDropdown.Divider />
+            <NavDropdown.Item onClick={handleLogout}>Logout</NavDropdown.Item>
+          </NavDropdown>
+
+          {/* Mobile Menu Toggle */}
+          <Button
+            className="d-lg-none text-green-700 ms-3"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            {isMobileMenuOpen ? <FaTimes size={28} /> : <FaBars size={28} />}
+          </Button>
+        </div>
       </div>
 
       {/* Mobile Menu */}
@@ -119,20 +151,18 @@ function CustomNavbar() {
             to="/dashboard"
             className={({ isActive }) =>
               isActive
-                ? 'text-green-800 bg-green-100 rounded w-100 px-3 py-2'
+                ? 'bg-success text-white rounded w-100 px-3 py-2'
                 : 'text-gray-600 hover:text-green-600 w-100 px-3 py-2'
             }
             onClick={() => setIsMobileMenuOpen(false)}
           >
             Dashboard
           </NavLink>
-
-          {/* Shared Features for Both Admin and Pengepul */}
           <NavLink
-            to="/admin/kategori-sampah"
+            to="/kategori-sampah"
             className={({ isActive }) =>
               isActive
-                ? 'text-green-800 bg-green-100 rounded w-100 px-3 py-2'
+                ? 'bg-success text-white rounded w-100 px-3 py-2'
                 : 'text-gray-600 hover:text-green-600 w-100 px-3 py-2'
             }
             onClick={() => setIsMobileMenuOpen(false)}
@@ -140,10 +170,10 @@ function CustomNavbar() {
             Kategori Sampah
           </NavLink>
           <NavLink
-            to="/admin/item-sampah"
+            to="/item-sampah"
             className={({ isActive }) =>
               isActive
-                ? 'text-green-800 bg-green-100 rounded w-100 px-3 py-2'
+                ? 'bg-success text-white rounded w-100 px-3 py-2'
                 : 'text-gray-600 hover:text-green-600 w-100 px-3 py-2'
             }
             onClick={() => setIsMobileMenuOpen(false)}
@@ -151,50 +181,16 @@ function CustomNavbar() {
             Item Sampah
           </NavLink>
           <NavLink
-            to="/admin/transaksi"
+            to="/transaksi"
             className={({ isActive }) =>
               isActive
-                ? 'text-green-800 bg-green-100 rounded w-100 px-3 py-2'
+                ? 'bg-success text-white rounded w-100 px-3 py-2'
                 : 'text-gray-600 hover:text-green-600 w-100 px-3 py-2'
             }
             onClick={() => setIsMobileMenuOpen(false)}
           >
             Transaksi
           </NavLink>
-
-          {/* Fitur Admin Data (Hanya Admin) */}
-          {userProfile.role === 'admin' && (
-            <NavDropdown title="Admin Data" className="w-100 text-gray-600">
-              <NavLink
-                to="/admin/pengguna"
-                className={({ isActive }) =>
-                  isActive
-                    ? 'text-green-800 bg-green-100 rounded w-100 px-3 py-2'
-                    : 'text-gray-600 hover:text-green-600 w-100 px-3 py-2'
-                }
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Pengguna
-              </NavLink>
-              <NavLink
-                to="/admin/anggota"
-                className={({ isActive }) =>
-                  isActive
-                    ? 'text-green-800 bg-green-100 rounded w-100 px-3 py-2'
-                    : 'text-gray-600 hover:text-green-600 w-100 px-3 py-2'
-                }
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Anggota
-              </NavLink>
-            </NavDropdown>
-          )}
-
-          {/* Profile & Logout */}
-          <button className="text-gray-600 hover:text-green-700 w-100 text-left mt-2">
-            Profile
-          </button>
-          <NavDropdown.Item onClick={handleLogout}>Logout</NavDropdown.Item>
         </div>
       </Collapse>
     </Navbar>
