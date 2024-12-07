@@ -101,7 +101,7 @@ function CustomNavbar() {
               title={<FaUserCircle size={20} className="text-green-700" />}
               id="user-nav-dropdown"
             >
-              <NavDropdown.Item as={Link} to="/profile">
+              <NavDropdown.Item as={Link} to="/my-profile">
                 My Profile
               </NavDropdown.Item>
               <NavDropdown.Divider />
