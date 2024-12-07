@@ -1,18 +1,30 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import axios from 'axios';  // Import axios
+import axios from 'axios';
+import Breadcrumbs from '../Breadcrumbs';
+import { FaTrash, FaEye, FaPlusCircle } from 'react-icons/fa';
+import { PiHouseFill } from 'react-icons/pi';
+import { FaGear } from 'react-icons/fa6';
+import { IoPeopleSharp } from 'react-icons/io5';
 
 function AnggotaData() {
   const [anggota, setAnggota] = useState([]);
 
-  // Fetch anggota data from backend using axios
+  // Breadcrumb paths
+  const breadcrumbPaths = [
+    { label: 'Home', link: '/', icon: <PiHouseFill /> },
+    { label: 'Dashboard', link: '/dashboard', icon: <FaGear /> },
+    { label: 'Data Anggota', icon: <IoPeopleSharp /> },
+  ];
+
+  // Fetch anggota data from backend
   useEffect(() => {
     async function fetchAnggota() {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/anggota`);  // Using axios.get
+        const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/anggota`);
         if (response.data.status === 'success') {
-          setAnggota(response.data.data);  // Set the anggota data from the API response
+          setAnggota(response.data.data);
         } else {
           alert('Failed to fetch anggota data');
         }
@@ -25,14 +37,12 @@ function AnggotaData() {
     fetchAnggota();
   }, []);
 
-  // Function to handle deleting anggota using axios
+  // Function to handle deleting anggota
   const handleDelete = async (id) => {
     try {
-      const response = await axios.delete(`/api/anggota/${id}`);  // Using axios.delete
-
+      const response = await axios.delete(`${import.meta.env.VITE_BASE_URL}/anggota/${id}`);
       if (response.status === 200) {
-        // Remove the deleted anggota from the list
-        setAnggota(anggota.filter(item => item.id !== id));
+        setAnggota(anggota.filter((item) => item.id !== id));
         alert('Anggota deleted successfully');
       } else {
         alert('Failed to delete anggota');
@@ -45,14 +55,22 @@ function AnggotaData() {
 
   return (
     <div className="container mt-4">
-      <h2>Data Anggota</h2>
-      <Link to="/admin/anggota/create" className="btn btn-primary mb-3">
-        Add New Anggota
+      {/* Breadcrumbs */}
+      <Breadcrumbs paths={breadcrumbPaths} />
+
+      <h2 className="text-center">Data Anggota</h2>
+      <hr />
+
+      {/* Add Anggota Button */}
+      <Link to="/admin/anggota/create" className="btn btn-primary align-items-center mb-3">
+        <FaPlusCircle className="me-2" /> Add New Anggota
       </Link>
+
+      {/* Table */}
       <Table striped bordered hover>
         <thead>
           <tr>
-            <th>ID</th>
+            <th>No.</th>
             <th>Nama</th>
             <th>Email</th>
             <th>No Telepon</th>
@@ -60,22 +78,43 @@ function AnggotaData() {
           </tr>
         </thead>
         <tbody>
-          {anggota.map((item) => (
-            <tr key={item.id}>
-              <td>{item.id}</td>
-              <td>{item.nama}</td>
-              <td>{item.email}</td>
-              <td>{item.noTelepon}</td>
-              <td>
-                <Link to={`/admin/anggota/${item.id}`} className="btn btn-info">
-                  View
-                </Link>
-                <Button variant="danger" onClick={() => handleDelete(item.id)} className="ms-2">
-                  Delete
-                </Button>
+          {anggota.length > 0 ? (
+            anggota.map((item, index) => (
+              <tr key={item.id}>
+                <td>{index + 1}</td>
+                <td>{item.nama}</td>
+                <td>{item.email}</td>
+                <td>{item.noTelepon}</td>
+                <td>
+                  <div className="d-flex flex-wrap gap-2"> {/* Wrapper dengan Flexbox untuk tombol */}
+                    {/* View Button */}
+                    <Link
+                      to={`/admin/anggota/${item.id}`}
+                      className="btn btn-info d-flex align-items-center btn-sm"
+                    >
+                      <FaEye className="me-2" /> View
+                    </Link>
+
+                    {/* Delete Button */}
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      className="d-flex align-items-center"
+                      onClick={() => handleDelete(item.id)}
+                    >
+                      <FaTrash className="me-2" /> Delete
+                    </Button>
+                  </div>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="5" className="text-center">
+                No anggota found
               </td>
             </tr>
-          ))}
+          )}
         </tbody>
       </Table>
     </div>
