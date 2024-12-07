@@ -16,6 +16,7 @@ import PengepulPage from './pages/Pengepul/PengepulPage'
 import ViewPengepulPage from './pages/Pengepul/ViewPengepulPage'
 import NotFoundPage from './pages/NotFoundPage'
 import ProtectedRoute from './components/ProtectedRoute';
+import MyProfilePage from './pages/Profile/MyProfilePage'
 
 function App() {
 
@@ -71,6 +72,11 @@ function App() {
         <Route
           path="/transaksi/view/:id"
           element={<ProtectedRoute element={ViewTransaksiPage} allowedRoles={['admin', 'pengepul']} />}
+        />
+
+<Route
+          path="/my-profile"
+          element={<ProtectedRoute element={MyProfilePage} allowedRoles={['admin', 'pengepul']} />}
         />
 
 
