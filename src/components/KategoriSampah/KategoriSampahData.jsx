@@ -1,18 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import axios from 'axios';  // Import axios
-import AddKategoriSampah from '../KategoriSampah/AddKategoriSampah'; // Import the modal component
-import ViewKategoriSampah from '../KategoriSampah/ViewKategoriSampah'; // Import ViewKategoriSampah modal
-
+import axios from 'axios';
+import AddKategoriSampah from '../KategoriSampah/AddKategoriSampah';
+import ViewKategoriSampah from '../KategoriSampah/ViewKategoriSampah';
+import Breadcrumbs from '../Breadcrumbs';
+import { FaTrash, FaEye, FaPlusCircle } from 'react-icons/fa';
+import { PiHouseFill } from 'react-icons/pi';
+import { FaGear } from 'react-icons/fa6';
+import { FaClipboardList } from 'react-icons/fa';
 
 function KategoriSampahData() {
   const [kategoriSampah, setKategoriSampah] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [showViewModal, setShowViewModal] = useState(false);  // State for the View modal
-  const [selectedKategoriSampah, setSelectedKategoriSampah] = useState(null);  // State for selected kategori sampah
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [selectedKategoriSampah, setSelectedKategoriSampah] = useState(null);
 
-  // Fetch kategori sampah data from backend using axios
+  const breadcrumbPaths = [
+    { label: 'Home', link: '/', icon: <PiHouseFill /> },
+    { label: 'Dashboard', link: '/dashboard', icon: <FaGear /> },
+    { label: 'Data Kategori Sampah', icon: <FaClipboardList /> },
+  ];
+
+  // Fetch kategori sampah data from backend
   useEffect(() => {
     async function fetchKategoriSampah() {
       try {
@@ -47,11 +57,11 @@ function KategoriSampahData() {
     }
   };
 
-
+  // Handle deleting kategori sampah
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`/api/sampah/kategori/${id}`);
-      setKategoriSampah((prevState) => prevState.filter(item => item.id !== id));
+      await axios.delete(`${import.meta.env.VITE_BASE_URL}/sampah/kategori/${id}`);
+      setKategoriSampah((prevState) => prevState.filter((item) => item.id !== id));
       alert('Kategori Sampah deleted');
     } catch (error) {
       console.error('Error deleting kategori sampah: ', error);
@@ -59,44 +69,78 @@ function KategoriSampahData() {
     }
   };
 
-    // Handle viewing kategori sampah details
+  // Handle viewing kategori sampah details
   const handleView = (kategori) => {
-    setSelectedKategoriSampah(kategori);  // Set the selected kategori sampah
-    setShowViewModal(true);  // Show the view modal
+    setSelectedKategoriSampah(kategori);
+    setShowViewModal(true);
   };
 
   return (
     <div className="container mt-4">
-      <h2>Data Kategori Sampah</h2>
-      <Button variant="primary" onClick={() => setShowModal(true)} className="mb-3">
-        Add New Kategori Sampah
-      </Button>
+      {/* Breadcrumbs */}
+      <Breadcrumbs paths={breadcrumbPaths} />
 
+      <h2 className="text-center">Data Kategori Sampah</h2>
+      <hr />
+
+      {/* Add Kategori Sampah Button */}
+      <Link
+        to="#"
+        onClick={() => setShowModal(true)}
+        className="mb-3 btn btn-primary align-items-center"
+      >
+        <FaPlusCircle className="me-2" /> Add New Kategori Sampah
+      </Link>
+
+      {/* Table */}
       <Table striped bordered hover>
         <thead>
           <tr>
-            <th>ID</th>
+            <th>No.</th>
             <th>Nama</th>
             <th>Deskripsi</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {kategoriSampah.map((item) => (
-            <tr key={item.id}>
-              <td>{item.id}</td>
-              <td>{item.nama}</td>
-              <td>{item.deskripsi}</td>
-              <td>
-                <Button variant='info' onClick={()=> handleView(item)} className="btn btn-info">
-                  View
-                </Button>
-                <Button variant="danger" onClick={() => handleDelete(item.id)} className="ms-2">
-                  Delete
-                </Button>
+          {kategoriSampah.length > 0 ? (
+            kategoriSampah.map((item, index) => (
+              <tr key={item.id}>
+                <td>{index + 1}</td>
+                <td>{item.nama}</td>
+                <td>{item.deskripsi}</td>
+                <td>
+                  <div className="d-flex flex-wrap gap-2">
+                    {/* View Button */}
+                    <Button
+                      variant="info"
+                      size="sm"
+                      className="d-flex align-items-center"
+                      onClick={() => handleView(item)}
+                    >
+                      <FaEye className="me-2" /> View
+                    </Button>
+
+                    {/* Delete Button */}
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      className="d-flex align-items-center"
+                      onClick={() => handleDelete(item.id)}
+                    >
+                      <FaTrash className="me-2" /> Delete
+                    </Button>
+                  </div>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="4" className="text-center">
+                No Kategori Sampah Found
               </td>
             </tr>
-          ))}
+          )}
         </tbody>
       </Table>
 
