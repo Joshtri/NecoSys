@@ -1,30 +1,76 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
+import Breadcrumbs from '../Breadcrumbs';
+import { FaTrash, FaEye, FaPlusCircle } from 'react-icons/fa';
+import { PiHouseFill } from 'react-icons/pi';
+import { FaGear } from 'react-icons/fa6';
+import { IoPeople } from 'react-icons/io5';
 
 function PenggunaData() {
   const [pengguna, setPengguna] = useState([]);
 
+  // Breadcrumb paths
+  const breadcrumbPaths = [
+    { label: 'Home', link: '/', icon: <PiHouseFill /> },
+    { label: 'Dashboard', link: '/dashboard', icon: <FaGear /> },
+    { label: 'Data Pengguna', icon: <IoPeople /> },
+  ];
+
   // Fetch pengguna data from backend
   useEffect(() => {
     async function fetchPengguna() {
-      const response = await fetch('/api/pengguna');
-      const data = await response.json();
-      setPengguna(data);
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/pengguna`);
+        if (response.data.status === 'success') {
+          setPengguna(response.data.data);
+        } else {
+          alert('Failed to fetch pengguna data');
+        }
+      } catch (error) {
+        console.error('Error fetching pengguna data:', error);
+        alert('Error fetching pengguna data');
+      }
     }
+
     fetchPengguna();
   }, []);
 
+  // Function to handle deleting pengguna
+  const handleDelete = async (id) => {
+    try {
+      const response = await axios.delete(`${import.meta.env.VITE_BASE_URL}/pengguna/${id}`);
+      if (response.status === 200) {
+        setPengguna(pengguna.filter((item) => item.id !== id));
+        alert('Pengguna deleted successfully');
+      } else {
+        alert('Failed to delete pengguna');
+      }
+    } catch (error) {
+      console.error('Error deleting pengguna:', error);
+      alert('Error deleting pengguna');
+    }
+  };
+
   return (
     <div className="container mt-4">
-      <h2>Data Pengguna</h2>
-      <Link to="/admin/pengguna/create" className="btn btn-primary mb-3">
-        Add New Pengguna
+      {/* Breadcrumbs */}
+      <Breadcrumbs paths={breadcrumbPaths} />
+
+      <h2 className="text-center">Data Pengguna</h2>
+      <hr />
+
+      {/* Add Pengguna Button */}
+      <Link to="/admin/pengguna/create" className="btn btn-primary d-flex align-items-center mb-3">
+        <FaPlusCircle className="me-2" /> Add New Pengguna
       </Link>
+
+      {/* Table */}
       <Table striped bordered hover>
         <thead>
           <tr>
-            <th>ID</th>
+            <th>No.</th>
             <th>Nama</th>
             <th>Email</th>
             <th>Peran</th>
@@ -32,34 +78,47 @@ function PenggunaData() {
           </tr>
         </thead>
         <tbody>
-          {pengguna.map((item) => (
-            <tr key={item.id}>
-              <td>{item.id}</td>
-              <td>{item.nama}</td>
-              <td>{item.email}</td>
-              <td>{item.peran}</td>
-              <td>
-                <Link to={`/admin/pengguna/${item.id}`} className="btn btn-info">
-                  View
-                </Link>
-                <Button variant="danger" onClick={() => handleDelete(item.id)} className="ms-2">
-                  Delete
-                </Button>
+          {pengguna.length > 0 ? (
+            pengguna.map((item, index) => (
+              <tr key={item.id}>
+                <td>{index + 1}</td>
+                <td>{item.nama}</td>
+                <td>{item.email}</td>
+                <td>{item.peran}</td>
+                <td>
+                  <div className="d-flex flex-wrap gap-2">
+                    {/* View Button */}
+                    <Link
+                      to={`/admin/pengguna/${item.id}`}
+                      className="btn btn-info d-flex align-items-center btn-sm"
+                    >
+                      <FaEye className="me-2" /> View
+                    </Link>
+
+                    {/* Delete Button */}
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      className="d-flex align-items-center"
+                      onClick={() => handleDelete(item.id)}
+                    >
+                      <FaTrash className="me-2" /> Delete
+                    </Button>
+                  </div>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="5" className="text-center">
+                No pengguna found
               </td>
             </tr>
-          ))}
+          )}
         </tbody>
       </Table>
     </div>
   );
-}
-
-// Function to handle deleting pengguna (you can implement backend API call here)
-async function handleDelete(id) {
-  await fetch(`/api/pengguna/${id}`, {
-    method: 'DELETE',
-  });
-  alert('Pengguna deleted');
 }
 
 export default PenggunaData;
