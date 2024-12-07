@@ -1,10 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Table, Button } from 'react-bootstrap';
+import { Table, Button, Badge } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import DeleteTransaksi from './DeleteTransaksi';
 import UpdateStatus from './UpdateStatus';
 import useUserProfile from '../../hooks/useUserProfile';
+import Breadcrumbs from '../Breadcrumbs';
+import { PiHouseFill } from 'react-icons/pi';
+import { IoPersonCircle } from 'react-icons/io5';
+import { FaGear } from 'react-icons/fa6';
+import { GrTransaction } from 'react-icons/gr';
+import { FaBan, FaCheckCircle, FaHourglassHalf, FaTimesCircle } from 'react-icons/fa';
+import { FaPlusCircle } from 'react-icons/fa';
+import { FaEye, FaEdit, FaTrash } from 'react-icons/fa'; // Import icons
+
 
 function TransaksiData() {
   const [transaksi, setTransaksi] = useState([]);
@@ -15,6 +24,14 @@ function TransaksiData() {
   const [newStatus, setNewStatus] = useState(''); // Store the new status
   const userProfile = useUserProfile(); // Get user profile data
   const [isLoading, setIsLoading] = useState(true); // Loading state to ensure userProfile is ready
+
+  const breadcrumbPaths = [
+    { label: 'Home', link: '/', icon: <PiHouseFill /> },
+    { label: 'Dashboard', link: '/dashboard', icon: <FaGear /> },
+    { label: 'Data Transaksi', icon: <GrTransaction /> }, // Item terakhir tanpa link
+  ];
+
+
 
   // Fetch transaksi data from backend
   useEffect(() => {
@@ -58,6 +75,21 @@ function TransaksiData() {
     setShowStatusModal(true);
   }
 
+  const renderStatus = (status) => {
+    switch (status) {
+      case 'success':
+        return <Badge bg="success"><FaCheckCircle /> Success</Badge>;
+      case 'pending':
+        return <Badge bg="warning"><FaHourglassHalf /> Pending</Badge>;
+      case 'failed':
+        return <Badge bg="danger"><FaTimesCircle /> Failed</Badge>;
+      case 'cancelled':
+        return <Badge bg="secondary"><FaBan /> Cancelled</Badge>;
+      default:
+        return <Badge bg="light">Unknown</Badge>;
+    }
+  };
+
   // Function to handle updating the status
   async function handleUpdateStatus() {
     try {
@@ -85,18 +117,23 @@ function TransaksiData() {
 
   return (
     <div className="container mt-4">
-      <h2>Data Transaksi</h2>
+      <Breadcrumbs paths={breadcrumbPaths} />
+
+      <h2 className='text-center'>Data Transaksi</h2>
+      <hr/>
       {isLoading ? (
         <p>Loading...</p>
       ) : (
         <>
-          <Link to="/transaksi/add" className="mb-3 btn btn-primary">
-            Add New Transaksi
+          <Link to="/transaksi/add" className="mb-3 btn btn-primary align-items-center">
+            <FaPlusCircle className="me-2" /> Add New Transaksi
           </Link>
+
           <Table striped bordered hover>
             <thead>
               <tr>
-                <th>ID</th>
+                {/* <th>ID</th> */}
+                <th>No.</th>
                 <th>Anggota</th>
                 <th>Item Sampah</th>
                 <th>Jumlah</th>
@@ -107,9 +144,10 @@ function TransaksiData() {
             </thead>
             <tbody>
               {Array.isArray(transaksi) && transaksi.length > 0 ? (
-                transaksi.map((item) => (
+                transaksi.map((item,index) => (
                   <tr key={item.id}>
-                    <td>{item.id}</td>
+                    {/* <td>{item.id}</td> */}
+                    <td>{index + 1}</td>
                     <td>{item.anggota ? item.anggota.nama : 'Unknown'}</td>
                     <td>
                       {item.itemTransaksi.length > 0 ? (
@@ -134,26 +172,37 @@ function TransaksiData() {
                       )}
                     </td>
                     <td>{item.totalTransaksi}</td>
-                    <td>{item.statusTransaksi}</td>
+                    <td>{renderStatus(item.statusTransaksi)}</td>
                     <td>
-                      <Link to={`/transaksi/view/${item.id}`} className="btn btn-info">
-                        View
-                      </Link>
-                      <Button
-                        variant="success"
-                        onClick={() => handleShowStatusModal(item.id, item.statusTransaksi)}
-                        className="ms-2"
-                      >
-                        Update Status
-                      </Button>
-                      <Button
-                        variant="danger"
-                        onClick={() => handleShowDeleteModal(item.id)}
-                        className="ms-2"
-                      >
-                        Delete
-                      </Button>
+                      <div className="d-flex flex-wrap gap-2"> {/* Wrapper dengan Flexbox dan jarak antar tombol */}
+                        {/* Tombol View */}
+                        <Link to={`/transaksi/view/${item.id}`} className="btn btn-info d-flex align-items-center btn-sm">
+                          <FaEye className="me-2" /> View
+                        </Link>
+
+                        {/* Tombol Update Status */}
+                        <Button
+                          variant="warning"
+                          onClick={() => handleShowStatusModal(item.id, item.statusTransaksi)}
+                          className="d-flex align-items-center"
+                          size="sm" // Ukuran tombol kecil
+                        >
+                          <FaEdit className="me-2" /> Update Status
+                        </Button>
+
+                        {/* Tombol Delete */}
+                        <Button
+                          variant="danger"
+                          onClick={() => handleShowDeleteModal(item.id)}
+                          className="d-flex align-items-center"
+                          size="sm" // Ukuran tombol kecil
+                        >
+                          <FaTrash className="me-2" /> Delete
+                        </Button>
+                      </div>
                     </td>
+
+
                   </tr>
                 ))
               ) : (
