@@ -21,7 +21,7 @@ function Dashboard() {
   useEffect(() => {
     const fetchTransaksiData = async () => {
       try {
-        const userId = userProfile?.id;
+        const pengepulId = userProfile?.id;
         const role = userProfile?.role;
 
         // Base URL from environment variable
@@ -30,9 +30,10 @@ function Dashboard() {
         let totalRes;
         if (role === 'admin') {
           totalRes = await axios.get(`${baseURL}/transaksi-count`);
-        } else if (role === 'pengepul' && userId) {
-          totalRes = await axios.get(`${baseURL}/transaksi-count/user/${userId}`);
+        } else if (role === 'pengepul' && pengepulId) {
+          totalRes = await axios.get(`${baseURL}/transaksi-count/user/${pengepulId}`);
         }
+        console.log('role yang dilogin adalah :' , role);
 
         setTotalTransaksi(totalRes?.data?.total || 0);
         setLoading(false);
@@ -126,7 +127,7 @@ function Dashboard() {
       <ModalTransaksi
         show={showTransaksiModal}
         onHide={() => setShowTransaksiModal(false)}
-        userId={userProfile?.id}
+        pengepulId={userProfile?.id}
         role={userProfile?.role}
       />
 
