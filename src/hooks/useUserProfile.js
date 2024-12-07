@@ -15,6 +15,7 @@ const useUserProfile = () => {
     const token = localStorage.getItem('token');
     if (!token) {
       console.error('Token tidak ditemukan. Silakan login terlebih dahulu.');
+      window.location.href = '/'; // Arahkan ke login jika token tidak ditemukan
       return;
     }
 
@@ -64,7 +65,13 @@ const useUserProfile = () => {
         console.error('Data profil tidak valid:', response.data);
       }
     } catch (error) {
-      console.error('Terjadi kesalahan saat mengambil data profil:', error);
+      if (error.response && error.response.status === 401) {
+        console.error('Token session expired. Mengarahkan kembali ke login.');
+        localStorage.removeItem('token'); // Hapus token dari localStorage
+        window.location.href = '/'; // Arahkan ke login
+      } else {
+        console.error('Terjadi kesalahan saat mengambil data profil:', error);
+      }
     }
   };
 
