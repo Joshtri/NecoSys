@@ -1,48 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import useUserProfile from '../../hooks/useUserProfile';
 import StatistikTabs from './Statistik/StatistikTabs';
-import { Card, Container, Row, Col, Button, Spinner, Modal } from 'react-bootstrap';
-import { FaRecycle, FaChartBar, FaBell } from 'react-icons/fa';
-import axios from 'axios';
-import ModalTransaksi from './ModalTransaksi';
+import { Card, Container, Row, Col, Button, Spinner } from 'react-bootstrap';
+import { FaRecycle, FaChartBar } from 'react-icons/fa';
 import { FcRating } from 'react-icons/fc';
+import axios from 'axios';
+import Calendar from 'react-calendar'; // Import kalender
+import 'react-calendar/dist/Calendar.css'; // Import style default react-calendar
 
 function Dashboard() {
-  const userProfile = useUserProfile(); // Data userProfile untuk menentukan role dan ID pengguna
+  const userProfile = useUserProfile();
   const [totalTransaksi, setTotalTransaksi] = useState(null);
   const [totalSampah, setTotalSampah] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [date, setDate] = useState(new Date());
 
-  // State untuk modal total transaksi
-  const [showTransaksiModal, setShowTransaksiModal] = useState(false);
-
-  // State untuk modal notifikasi
-  const [showNotifikasiModal, setShowNotifikasiModal] = useState(false);
-
-  // Fetch total transaksi dan sampah
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
         const pengepulId = userProfile?.id;
         const role = userProfile?.role;
-
-        // Base URL from environment variable
         const baseURL = import.meta.env.VITE_BASE_URL;
 
         let totalRes;
         let sampahRes;
 
         if (role === 'admin') {
-          // Admin melihat semua transaksi dan sampah
           totalRes = await axios.get(`${baseURL}/transaksi-count`);
           sampahRes = await axios.get(`${baseURL}/sampah/total`);
         } else if (role === 'pengepul' && pengepulId) {
-          // Pengepul hanya melihat transaksi dan sampah miliknya
           totalRes = await axios.get(`${baseURL}/transaksi-count/user/${pengepulId}`);
-          sampahRes = await axios.get(`${baseURL}/sampah/total/${pengepulId}`);
+          sampahRes = await axios.get(`${baseURL}/sampah/total/pengepul/${pengepulId}`);
         }
-
-        console.log('data sampahtotal :',sampahRes);
 
         setTotalTransaksi(totalRes?.data?.total || 0);
         setTotalSampah(sampahRes?.data?.totalSampah || 0);
@@ -76,11 +65,7 @@ function Dashboard() {
                   )}
                 </div>
               </div>
-              <Button
-                variant="outline-primary"
-                size="sm"
-                onClick={() => setShowTransaksiModal(true)}
-              >
+              <Button variant="outline-primary" size="sm">
                 Lihat Rincian
               </Button>
             </Card.Body>
@@ -116,48 +101,43 @@ function Dashboard() {
                   <p className="text-muted mb-0">Cek rating anda sekarang</p>
                 </div>
               </div>
-              <Button
-                variant="outline-primary"
-                size="sm"
-                onClick={() => setShowNotifikasiModal(true)}
-              >
+              <Button variant="outline-primary" size="sm">
                 Lihat Rating
               </Button>
             </Card.Body>
           </Card>
         </Col>
-      </Row>  
+      </Row>
 
-      {/* Tab Statistik */}
+      {/* Kalender dan Statistik dalam Satu Baris */}
       <Row className="mb-4">
-        <Col>
-          <Card className="shadow-sm">
+        <Col md={6} sm={12}>
+          <Card className="shadow-sm h-100">
             <Card.Body>
+              <h5 className="fw-bold text-center mb-3">Kalender Aktivitas</h5>
+              <Calendar
+                onChange={setDate}
+                value={date}
+                className="mx-auto"
+              />
+              <p className="text-center mt-3">
+                <strong>Tanggal yang dipilih:</strong> {date.toLocaleDateString()}
+              </p>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col md={6} sm={12}>
+          <Card className="shadow-sm h-100">
+            <Card.Body>
+              <h5 className="fw-bold text-center mb-3">Statistik</h5>
               <StatistikTabs />
             </Card.Body>
           </Card>
         </Col>
       </Row>
-
-      {/* Modal Transaksi */}
-      <ModalTransaksi
-        show={showTransaksiModal}
-        onHide={() => setShowTransaksiModal(false)}
-        pengepulId={userProfile?.id}
-        role={userProfile?.role}
-      />
-
-      {/* Modal Notifikasi */}
-      <Modal show={showNotifikasiModal} onHide={() => setShowNotifikasiModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Rincian Notifikasi</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <p>Anda memiliki 3 permintaan baru yang perlu ditinjau.</p>
-        </Modal.Body>
-      </Modal>
     </Container>
   );
 }
 
 export default Dashboard;
+  
