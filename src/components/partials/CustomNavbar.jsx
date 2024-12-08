@@ -31,9 +31,9 @@ function CustomNavbar() {
             to="/dashboard"
             className="navbar-brand text-xl font-bold text-green-700 hover:text-green-900 d-flex align-items-center me-4"
           >
-            SI |
+            IS |
             <FaRecycle size={24} className="me-2 ms-2" />
-            {userProfile.role === 'pengepul' ? userProfile.namaBankSampah || 'Bank Sampah' : '| ECO Bank'}
+            {userProfile.role === 'pengepul' ? userProfile.namaBankSampah || 'Bank Sampah' : '| Nature ECO'}
           </Link>
 
           {/* Desktop Navigation Links */}
