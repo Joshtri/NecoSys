@@ -38,11 +38,7 @@ function Login() {
         kataSandi: data.password, // Ubah key dari 'password' menjadi 'kataSandi'
       };
 
-      console.log('Data dikirim ke backend:', payload); // Debugging
-
       const response = await axios.post(url, payload);
-      console.log('Full API response:', response);
-
       const res = response.data;
 
       // Simpan token dan informasi user ke localStorage
@@ -61,7 +57,6 @@ function Login() {
         }
       }, 2000);
     } catch (error) {
-      console.error('Error occurred:', error);
       setError(
         error.response?.data?.error || 'Terjadi kesalahan pada server.'
       );
@@ -78,14 +73,13 @@ function Login() {
           md={6}
           className="bg-success text-white p-5 d-flex flex-column justify-content-center align-items-center rounded-start"
         >
-          <h2 className="mb-3 fw-bold">Selamat Datang di Eco Bank!</h2>
+          <h2 className="mb-3 fw-bold">Selamat Datang di NatureCare Eco!</h2>
           <p className="text-center">
-            Bergabunglah bersama kami untuk menciptakan lingkungan yang lebih bersih dan berkelanjutan. Kelola sampah
-            dengan mudah melalui platform inovatif kami.
+            Bergabunglah bersama kami di <strong>NatureCare Eco</strong> untuk menciptakan lingkungan yang lebih bersih, berkelanjutan, dan ramah lingkungan.
           </p>
           <p className="text-center fw-bold">
-            🌱 <span className="text-warning">Eco Bank</span>: <br />
-            Untuk planet yang lebih hijau.
+            🌱 NatureCare Eco: <br />
+            Solusi digital untuk masa depan yang hijau.
           </p>
         </Col>
 
@@ -93,7 +87,7 @@ function Login() {
         <Col xs={12} md={6} className="bg-white p-5 rounded-end">
           <h2 className="text-center mb-4 fw-bold">Masuk ke Akun Anda</h2>
           <p className="text-center text-muted mb-4">
-            Kami senang melihat Anda kembali bersama kami di perjalanan menuju perubahan lingkungan yang lebih baik.
+            Kami senang melihat Anda kembali bersama kami di <strong>NatureCare Eco</strong> untuk mewujudkan perubahan lingkungan yang lebih baik.
           </p>
 
           <Form onSubmit={handleSubmit}>

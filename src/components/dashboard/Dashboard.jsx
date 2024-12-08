@@ -46,8 +46,8 @@ function Dashboard() {
   }, [userProfile]);
 
   return (
-    <Container fluid className="bg-light py-4">
-      <h1 className="text-center text-primary mb-4 fw-bold">Dashboard Eco Bank</h1>
+    <Container fluid className=" py-4">
+<h1 className="text-center mb-4 fw-bold" style={{ color: '#008404' }}>Dashboard NatureCare</h1>
 
       {/* Summary Cards */}
       <Row className="mb-4">
